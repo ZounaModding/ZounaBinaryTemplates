@@ -1,6 +1,6 @@
 //------------------------------------------------
 //--- 010 Editor v12.0.1 Binary Template
-//--- Asobo Studio Flare_Z v1.06.63.0X
+//--- Asobo Studio CameraZone_Z v1.06.63.0X
 //------------------------------------------------
 
 LittleEndian();
@@ -12,16 +12,16 @@ local int colorSelect = 0;
 local int colorId = 0;
 local DWORD clr = 0;
 local DWORD jetMap[6*3] = {
-	0x0000cc,0x0000ff,0x0033ff,0x0066ff,0x0099ff,0x00ccff,
-	0x00cccc,0x33ffcc,0x66ff99,0x99ff66,0xccff33,0xffff00,
-	0xffcc00,0xff9900,0xff6600,0xff3300,0xff0000,0xcc0000
+    0x0000cc,0x0000ff,0x0033ff,0x0066ff,0x0099ff,0x00ccff,
+    0x00cccc,0x33ffcc,0x66ff99,0x99ff66,0xccff33,0xffff00,
+    0xffcc00,0xff9900,0xff6600,0xff3300,0xff0000,0xcc0000
 };
 
 void ChangeColor(byte bChangeColor) {
-	if(bChangeColor == 1) {colorSelect++; colorId = 0;}
-	clr = jetMap[(colorSelect%3)*6+(colorId%6)];
-	SetBackColor(clr);
-	colorId++;
+    if(bChangeColor == 1) {colorSelect++; colorId = 0;}
+    clr = jetMap[(colorSelect%3)*6+(colorId%6)];
+    SetBackColor(clr);
+    colorId++;
 }
 
 //------------------------------------------------
@@ -96,21 +96,6 @@ string Vec3fByteToString( Vec3fByte& value )
 
 //------------------------------------------------
 
-struct BffHeader {
-    char magic[4];
-    byte platform;
-    byte version_format;
-    uint32 version_asobo[4];
-    byte alignment[2];
-};
-
-struct Color {
-    float R<read=floatToByte>;
-    float G<read=floatToByte>;
-    float B<read=floatToByte>;
-    float A<read=floatToByte>;
-};
-
 struct Quat {
     Vec3f v;
     float w;
@@ -151,6 +136,12 @@ struct LinkInfo {
     uint16 type;
 };
 
+struct BffHeader {
+    char magic[4];
+    ushort bytesToSkip;
+    byte skippedBytes[bytesToSkip];
+};
+
 struct ObjectHeader {
     BffHeader bffHeader;
     uint32 dataSize;
@@ -162,30 +153,91 @@ struct ObjectHeader {
     LinkInfo linkInfo;
 };
 
-struct FlareDesc_Z {
-    Color color;
-    float scale;
-    float offsetFromCenter;
-    float unkFloats[8];
+struct SplineZoneVoxel_Z {
+    uint16 size;
     ChangeColor(1);
-    int32 materialAnimCrc32;
+    uint16 offset;
 };
 
-struct Flare_Z {
+struct SplineZoneSead_Z {
+    Vec2f PMin;
     ChangeColor(1);
+    Vec2f PMax;
+    ChangeColor(1);
+    Vec2f InvDiag;
+    ChangeColor(1);
+    uint32 maxZoneIndex;
+    ChangeColor(1);
+    uint32 sizeX;
+    ChangeColor(1);
+    uint32 sizeY;
+    ChangeColor(1);
+    SplineZoneVoxel_Z gridDA[sizeX*sizeY]; // stores the indices of zones that apply for a certain grid square
+    ChangeColor(1);
+    uint32 zoneIndexCount;
+    uint16 zoneIndices[zoneIndexCount]; // stores indices into splineZones
+};
+
+struct CornerSpline {
+    uint16 Pt0Id; // first index into points DA
+    uint16 Pt1Id; // second index into points DA
+};
+
+struct SplineZoneSpline_Z {
+    uint16 size;
+    ChangeColor(1);
+    uint16 offset;
+};
+
+struct SplineZone {
+    float Y; // (maxY + minY / 2) taken from the max and min points of the splines that make it up, used to determine closest zone if 2 or more zones overlap
+    ChangeColor(1);
+    SplineZoneSpline_Z splineIdsRef; // stores indices of the splineIds that make up this zone
+    ChangeColor(1);
+    uint16 unkShort1;
+    ChangeColor(1);
+    uint16 pointFlag; // related to it using Pt0 or Pt1 of the spline
+    ChangeColor(1);
+    uint32 unkUint;
+};
+
+struct SplineZoneLink {
+    float x;
+    float y;
+    uint16 id1;
+    uint16 id2;
+};
+
+struct SplineZone_Z {
     ObjectHeader header;
     ChangeColor(1);
-    byte unkBool;
+    Vec4f unkVec4;
     ChangeColor(1);
-    uint32 flareDescCount;
+    uint32 pointCount;
+    Vec3f points[pointCount] <optimize=false>;
     ChangeColor(1);
-    FlareDesc_Z flareDescs[flareCount] <optimize=false>;
-} flare;
+    uint32 splineCount;
+    CornerSpline splines[splineCount] <optimize=false>;
+    ChangeColor(1);
+    uint32 splineZoneCount;
+    SplineZone splineZones[splineZoneCount] <optimize=false>;
+    ChangeColor(1);
+    uint32 splineIdCount;
+    uint16 splineIds[splineIdCount] <optimize=false>; // stores indices into the spline DA
+    ChangeColor(1);
+    uint32 splineZoneLinkCount;
+    SplineZoneLink splineZoneLinks[splineZoneLinkCount] <optimize=false>;
+    ChangeColor(1);
+    SplineZoneSead_Z splineZoneSead; // check if it's its own struct or not
+};
 
-string floatToByte(float& value )
-{
-    local string str = "";
-    local float colorFloatToByte = ((value*255.0));
-    SPrintf(str, "%i",colorFloatToByte);
-    return str;
-}
+struct Occluder_Z {
+    ChangeColor(1);
+    SplineZone_Z splineZone;
+    ChangeColor(1);
+    uint32 zoneIdCount; // zones for nodes in the level
+    uint32 zoneIds[zoneIdCount] <optimize=false>;
+    ChangeColor(1);
+    uint32 skipBytesCount;
+    byte skippedBytes[skipBytesCount];
+} occluder;

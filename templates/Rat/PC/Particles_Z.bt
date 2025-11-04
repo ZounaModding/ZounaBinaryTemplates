@@ -1,0 +1,254 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//--- Asobo Studio Particles_Z v1.06.63.0X
+//------------------------------------------------
+
+LittleEndian();
+
+//------------------------------------------------
+//--- Color Implementation taken from JPG.bt
+
+local int colorSelect = 0;
+local int colorId = 0;
+local DWORD clr = 0;
+local DWORD jetMap[6*3] = {
+	0x0000cc,0x0000ff,0x0033ff,0x0066ff,0x0099ff,0x00ccff,
+	0x00cccc,0x33ffcc,0x66ff99,0x99ff66,0xccff33,0xffff00,
+	0xffcc00,0xff9900,0xff6600,0xff3300,0xff0000,0xcc0000
+};
+
+void ChangeColor(byte bChangeColor) {
+	if(bChangeColor == 1) {colorSelect++; colorId = 0;}
+	clr = jetMap[(colorSelect%3)*6+(colorId%6)];
+	SetBackColor(clr);
+	colorId++;
+}
+
+//------------------------------------------------
+
+//------------------------------------------------
+//--- Vector struct taken from tge
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+    float W;
+} Vec4f <read=Vec4fToString>;
+
+string Vec4fToString( Vec4f& value )
+{
+    local char buffer[255];
+    SPrintf( buffer, "[%.6f, %.6f, %.6f, %.6f]", value.X, value.Y, value.Z, value.W );
+    return buffer;
+}
+
+struct Vec4i16 {
+    int16 x;
+    int16 y;
+    int16 z;
+    int16 w;
+};
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vec3f <read=Vec3fToString>;
+
+string Vec3fToString( Vec3f& value )
+{
+    local char buffer[255];
+    SPrintf( buffer, "[%.6f, %.6f, %.6f]", value.X, value.Y, value.Z );
+    return buffer;
+}
+
+typedef struct
+{
+    float X;
+    float Y;
+} Vec2f;
+
+struct Vec2i16 {
+    int16 x;
+    int16 y;
+};
+
+//------------------------------------------------
+
+struct Mat4x4 {
+    Vec4f rows[4];
+};
+
+struct Rect {
+    uint16 x1;
+    uint16 y1;
+    uint16 x2;
+    uint16 y2;
+};
+
+struct Sphere_Z {
+    Vec3f Center;
+    float radius;
+};
+
+struct Mat3x4 {
+    Vec4f rows[3];
+};
+
+struct Box_Z {
+    Mat3x4 mat;
+    Vec3f vec;
+    float maybeScale; // not really used it seems
+};
+
+struct LinkInfo {
+    uint32 linkCrc32;
+    uint32 linkCount;
+    uint32 linkedCrc32[linkCount];
+    uint32 dataCrc32;
+    Sphere_Z bSphereLocal;
+    Box_Z bBox;
+    float fadeOutDistance;
+    uint32 flags;
+    uint16 type;
+};
+
+struct BffHeader {
+    char magic[4];
+    ushort bytesToSkip;
+    byte skippedBytes[bytesToSkip];
+};
+
+struct ObjectHeader {
+    BffHeader bffHeader;
+    uint32 dataSize;
+    uint32 linkSize;
+    uint32 decompressedSize;
+    uint32 compressedSize;
+    uint32 classCrc32;
+    uint32 nameCrc32;
+    LinkInfo linkInfo;
+};
+
+struct Color {
+    float R<read=floatToByte>;
+    float G<read=floatToByte>;
+    float B<read=floatToByte>;
+    float A<read=floatToByte>;
+};
+
+struct Quat {
+    Vec3f v;
+    float w;
+};
+
+struct KeyVec2fLinearComp_Z {
+    float time;
+    ChangeColor(1);
+    Vec2i16 value;
+};
+
+struct KeyframerVec2fLinearComp_Z {
+    uint16 flag;
+    ChangeColor(1);
+    uint32 keyCount;
+    KeyVec2fLinearComp_Z keys[keyCount] <optimize=false>;
+};
+
+struct KeyVec4fLinearComp_Z {
+    float time;
+    ChangeColor(1);
+    Vec4i16 value;
+};
+
+struct KeyframerVec4fLinearComp_Z {
+    uint16 flag;
+    ChangeColor(1);
+    uint32 keyCount;
+    KeyVec4fLinearComp_Z keys[keyCount] <optimize=false>;
+};
+
+struct KeyVec3fLinear_Z {
+    float time;
+    ChangeColor(1);
+    Vec3f value;
+};
+
+struct KeyframerVec3fLinear_Z {
+    uint16 flag;
+    ChangeColor(1);
+    uint32 keyCount;
+    KeyVec3fLinear_Z keys[keyCount] <optimize=false>;
+};
+
+struct KeyFloatLinearComp_Z {
+    float time;
+    int16 value;
+    int16 padding;
+};
+
+struct KeyframerFloatLinearComp_Z
+{
+    uint16 flag;
+    uint32 keyCount;
+    KeyFloatLinearComp_Z keys[keyCount];
+};
+
+struct ParticlesEle_Z {
+    uint16 maxQuantity;
+    uint16 unkShort1;
+    float unkFloat1;
+    float speed;
+    float rotation;
+    float coneRadius_rectL_offAxisAngle;
+    float coneHeight_offAxisSpread;
+    float coneRadius2_rectW_offPlaneAngle;
+    float offPlaneSpread;
+    float periodTime;
+    float lifeTime;
+    float sizeX;
+    float sizeY;
+    float bubbleAmplitude;
+    float bubblePeriod;
+    float bubbleVariation;
+    float gravity;
+    float reflex0;
+    float reflex1;
+    uint32 flag;
+    KeyframerVec2fLinearComp_Z emitterLifeVelocity;
+    KeyframerVec4fLinearComp_Z emitterSizeRotRateGravity;
+    KeyframerVec4fLinearComp_Z particleSizexRotVelocityAlpha;
+    KeyframerFloatLinearComp_Z particleSizey;
+    KeyframerVec3fLinear_Z emitterColor;
+    KeyframerVec3fLinear_Z particleColor;
+    KeyframerFloatLinearComp_Z particleGravity;
+    int32 materialAnimCrc32;
+};
+
+//Emitter Flags:
+
+//0x1 -> FL_PARTICLES_LOOP // Checked - Loop when periodTime finishes
+//0x2 -> FL_PARTICLES_LOCK_H // Checked - Lock texture horizontal (if !FL_PARTICLES_LOCK_H && !FL_PARTICLES_LOCK_V then it acts as rotshape)
+//0x4 -> FL_PARTICLES_LOCK_V // Checked - Lock texture vertical (if !FL_PARTICLES_LOCK_H && !FL_PARTICLES_LOCK_V then it acts as rotshape)
+//0x8 -> FL_PARTICLES_USE_TOTAL // Checked - When looping it accumulates rate*rateMultiplier(0) particles to spawn all at once (if there aren't maxQuantity)
+//0x10 -> It's something
+//0x20 -> It's something - I don't see difference between having and not
+// IDK
+//0x200 -> FL_PARTICLES_FOLLOW_NODE - Overrides plane collision - Might be same as UBI FL_PARTICLES_NODEREL but the name is bad
+//0x400 -> FL_PARTICLES_PLANE_COLLISION - Collide with planes defined by the Mat4x4 DA
+// There's also at least 0x200, 0x400 havent looked into them or others
+
+struct Particles_Z
+{
+    ChangeColor(1);
+    ObjectHeader objHeader;
+    ChangeColor(1);
+    uint32 particleEmitterCount;
+    ParticlesEle_Z particleEmitters[particleEmitterCount] <optimize=false>;
+    uint32 localCollisionPlaneCount;
+    Mat4x4 localCollisionPlanes[localCollisionPlaneCount];
+    float unkFloat;
+} particles;

@@ -98,7 +98,14 @@ struct LinkInfo {
     uint16 type;
 };
 
+struct BffHeader {
+    char magic[4];
+    ushort bytesToSkip;
+    byte skippedBytes[bytesToSkip];
+};
+
 struct ObjectHeader {
+    BffHeader bffHeader;
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;
@@ -125,25 +132,25 @@ struct Omni_Z
     ChangeColor(1);
     ObjectHeader objHeader;
     ChangeColor(1);
-    Mat4x4 unkMat; // seems unused
+    Mat4x4 textureProjMat; // used to project textures if the feature was enabled (it's not)
     ChangeColor(1);
     Vec3f color;
     ChangeColor(1);
-    float attn;
+    float intensity; // scales the final color
     ChangeColor(1);
-    Vec3f attnColor;
+    Vec3f scaledColor; // color after intensity applied
     ChangeColor(1);
-    float unkAngle; // debug pc to check
+    float spotInnerHalfAngleRad; // unused in engine code (since it's precalculated into the other params)
     ChangeColor(1);
-    float cutoffAngle; //Spotlight related (GX_InitLightSpot) debug pc to check
+    float spotOuterHalfAngleRad; // cutoff angle in radians for spotlight
     ChangeColor(1);
-    float cutoffRelatedDistance1; // defines attenuation with distance
+    float spotFalloffSlope; // defines spotlight attenuation between the inner and outer angle = -1 / (cos(spotInnerHalfAngleRad) - cos(spotOuterHalfAngleRad))
     ChangeColor(1);
-    float cutoffRelatedDistance2; // defines attenuation with distance
+    float spotFalloffOffset; // defines spotlight attenuation between the inner and outer angle = 1 + (cos(spotOuterHalfAngleRad) / (cos(spotInnerHalfAngleRad) - cos(spotOuterHalfAngleRad)))
     ChangeColor(1);
-    float falloffStart; // range at which the light begins to fall off, 0-radius for normal. if > radius the light gets inverted
+    float start; // range at which the light begins to fall off, 0-radius for normal. if > radius the light gets inverted
     ChangeColor(1);
-    float radius; // useless, overriden by bSphere radius
+    float end; // end of light falloff, should always be same as bSphere radius
     ChangeColor(1);
-    uint32 materialAnimCrc32; // unused
+    uint32 materialAnimCrc32; // used to project textures if the feature was enabled
 } omni;

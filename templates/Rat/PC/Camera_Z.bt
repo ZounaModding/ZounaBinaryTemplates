@@ -97,11 +97,9 @@ string Vec3fByteToString( Vec3fByte& value )
 //------------------------------------------------
 
 struct BffHeader {
-    uint32 magic;
-    byte platform;
-    byte version_format;
-    uint32 version_asobo[4];
-    byte alignment[2];
+    char magic[4];
+    ushort bytesToSkip;
+    byte skippedBytes[bytesToSkip];
 };
 
 struct Quat {
@@ -145,7 +143,7 @@ struct LinkInfo {
 };
 
 struct ObjectHeader {
-    //BffHeader bffHeader;
+    BffHeader bffHeader;
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;

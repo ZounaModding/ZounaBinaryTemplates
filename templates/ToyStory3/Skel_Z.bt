@@ -85,7 +85,8 @@ struct Sphere_Z {
 
 struct ObjectDatas_Z {
     uint32 flag;
-    Sphere_Z bSphereLocal;   
+	ChangeColor(1);
+    Color defaultColor;
 };
 
 struct Quat {

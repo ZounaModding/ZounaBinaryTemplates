@@ -33,7 +33,14 @@ struct LinkInfo {
     ubyte links[header.linkSize - (linkCount * 4) - 8];
 };
 
+struct BffHeader {
+    char magic[4];
+    ushort bytesToSkip;
+    byte skippedBytes[bytesToSkip];
+};
+
 struct ObjectHeader {
+    BffHeader bffHeader;
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;
@@ -42,6 +49,22 @@ struct ObjectHeader {
     uint32 nameCrc32;
     LinkInfo linkInfo;
 };
+
+// BmTransp
+//    BM_NO_TRANSP = 0,
+//    BM_TRANSP_ONE = 1,
+//    BM_TRANSP = 2
+//
+
+// flags: - Basically normally it's 181 = 0xB5 if it has mips or 149 = 0x95 if it doesnt
+// FL_UNK_1 = 0x1 -> all that i've seen have it
+// FL_UNK_2 = 0x2 -> none that i've seen have it
+// FL_BITMAP_BILINEAR = 0x4 -> all that i've seen have it
+// FL_UNK_8 = 0x8 -> ONLY SEEN it on WHITETEXTURE
+// FL_UNK_16 = 0x10 -> most have it set, some bitmaps used in UI like the arrow keys or tutorial images don't have it set
+// FL_BITMAP_MIPMAP = 0x20 -> has mips
+// FL_UNK_64 = 0x40 -> none that i've seen have it
+// FL_UNK_128 = 0x80 -> all that i've seen have it
 
 struct Bitmap_Z {
     ChangeColor(1);

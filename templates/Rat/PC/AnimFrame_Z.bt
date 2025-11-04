@@ -50,7 +50,14 @@ struct LinkInfo {
     uint32 linkedCrc32[linkCount];
 };
 
+struct BffHeader {
+    char magic[4];
+    ushort bytesToSkip;
+    byte skippedBytes[bytesToSkip];
+};
+
 struct ObjectHeader {
+    BffHeader bffHeader;
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;
@@ -81,6 +88,19 @@ struct KeyframerVec3f_Z {
     uint16 flag;
     uint32 keyCount;
     KeyVec3f_Z keys[keyCount];
+};
+
+struct KeyExtVec3f_Z {
+    float time;
+    Vec3f value;
+    Vec3f tangentIn;
+    Vec3f tangentOut;
+};
+
+struct KeyframerExtVec3f_Z {
+    uint16 flag;
+    uint32 keyCount;
+    KeyExtVec3f_Z keys[keyCount];
 };
 
 struct KeyVec3fLinear_Z {
@@ -195,23 +215,23 @@ struct AnimFrame_Z {
     ChangeColor(1);
     float maxTime;
     ChangeColor(1);
-    KeyframerVec3f_Z keyframerTranslation;
+    KeyframerVec3f_Z translationKeyframer;
     ChangeColor(1);
-    KeyframerRot_Z keyframerRot;
+    KeyframerRot_Z rotKeyframer;
     ChangeColor(1);
-    KeyframerVec3fComp_Z keyframerScale;
+    KeyframerVec3fComp_Z scaleKeyframer;
     ChangeColor(1);
-    KeyframerFloatComp_Z keyframerTime;
+    KeyframerFloatComp_Z timeKeyframer; // used to update followKeyframer
     ChangeColor(1);
-    KeyframerVec3fLinear_Z keyframerColor;
+    KeyframerVec3fLinear_Z colorKeyframer; // for hfog/light/omni
     ChangeColor(1);
-    KeyframerVec3fLinear_Z keyframerAmbient;
+    KeyframerVec3fLinear_Z ambientKeyframer; // for light
     ChangeColor(1);
-    KeyframerMessage_Z keyframerMessage;
+    KeyframerMessage_Z msgKeyframer;
     ChangeColor(1);
-    KeyframerFollow_Z keyframerFollow;
+    KeyframerFollow_Z followKeyframer;
     ChangeColor(1);
-    KeyframerStartStop_Z keyframerStartStop;
+    KeyframerStartStop_Z startStopKeyframer; // start and stop other anim frames
     ChangeColor(1);
     float curTime;
     ChangeColor(1);

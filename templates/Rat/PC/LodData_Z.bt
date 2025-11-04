@@ -136,9 +136,9 @@ struct Color {
 struct ObjectDatas_Z {
     ObjectHeader objectHeader;
     ChangeColor(1);
-    float unkFloat1;
-    ChangeColor(1);
-    Color color;
+    uint32 flag;
+	ChangeColor(1);
+    Color defaultColor;
 };
 
 struct unkStruct {

@@ -12,16 +12,16 @@ local int colorSelect = 0;
 local int colorId = 0;
 local DWORD clr = 0;
 local DWORD jetMap[6*3] = {
-	0x0000cc,0x0000ff,0x0033ff,0x0066ff,0x0099ff,0x00ccff,
-	0x00cccc,0x33ffcc,0x66ff99,0x99ff66,0xccff33,0xffff00,
-	0xffcc00,0xff9900,0xff6600,0xff3300,0xff0000,0xcc0000
+    0x0000cc,0x0000ff,0x0033ff,0x0066ff,0x0099ff,0x00ccff,
+    0x00cccc,0x33ffcc,0x66ff99,0x99ff66,0xccff33,0xffff00,
+    0xffcc00,0xff9900,0xff6600,0xff3300,0xff0000,0xcc0000
 };
 
 void ChangeColor(byte bChangeColor) {
-	if(bChangeColor == 1) {colorSelect++; colorId = 0;}
-	clr = jetMap[(colorSelect%3)*6+(colorId%6)];
-	SetBackColor(clr);
-	colorId++;
+    if(bChangeColor == 1) {colorSelect++; colorId = 0;}
+    clr = jetMap[(colorSelect%3)*6+(colorId%6)];
+    SetBackColor(clr);
+    colorId++;
 }
 
 //------------------------------------------------
@@ -124,6 +124,18 @@ struct Sphere_Z {
     float radius;
 };
 
+struct Segment_Z {
+    Vec3f origin;
+    float length;
+    Vec3f direction;
+    float pad;
+};
+
+struct Cylindre_Z {
+    Segment_Z seg;
+    float radius;
+};
+
 struct LinkInfo {
     uint32 linkCrc32;
     uint32 linkCount;
@@ -136,7 +148,14 @@ struct LinkInfo {
     uint16 type;
 };
 
+struct BffHeader {
+    char magic[4];
+    ushort bytesToSkip;
+    byte skippedBytes[bytesToSkip];
+};
+
 struct ObjectHeader {
+    BffHeader bffHeader;
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;
@@ -146,12 +165,10 @@ struct ObjectHeader {
     LinkInfo linkInfo;
 };
 
-struct PointsRelated0 {
-    byte data[12];
-};
-
-struct PointsRelated1 {
-    byte data[16];
+// $SABE: Tangent Binormal Vertex ? - From Monopoly MAP
+struct TBVtx {
+    Vec2f unkVec1;
+    Vec2f unkVec2;
 };
 
 struct MorpherRelated {
@@ -188,7 +205,8 @@ struct BoxCol_Z {
 };
 
 struct CylindreCol_Z {
-    byte data[40];
+    Cylindre_Z cylindre;
+    uint32 flag;
     uint32 nameCrc32;
 };
 
@@ -224,11 +242,32 @@ struct Vertex {
 struct Points_Z {
     ObjectHeader header;
     ChangeColor(1);
-    uint32 PointsRelated0Count; // maybe vertices
-    PointsRelated0 PointsRelateds0[PointsRelated0Count];
-    uint32 PointsRelated1Count; // maybe normals
-    PointsRelated1 PointsRelateds1[PointsRelated1Count];
+    uint32 positionCount;
+    Vec3f positions[positionCount];
+    uint32 tbVtxCount;
+    TBVtx tbVtxs[tbVtxCount];
     Morpher_Z morpher;
+};
+
+struct Strip_Z {
+    uint32 indexCount;
+    ChangeColor(1);
+    uint16 indices[indexCount];
+    ChangeColor(1);
+    byte unkBytes[8];
+};
+
+struct Vtx_Z {
+    uint16 uvId;
+    uint16 normId;
+    uint16 colId;
+    uint16 verticesId;
+};
+
+struct StripExt_Z {
+    uint32 vtxCount;
+    ChangeColor(1);
+    Vtx_Z vertices[vtxCount];
 };
 
 struct Mesh_Z {
@@ -236,41 +275,22 @@ struct Mesh_Z {
     ChangeColor(1);
     uint32 uvCount;
     ChangeColor(1);
-    struct {
-        float u;
-        float v;
-    } uvs[8*uvCount];
-    if (uvCount != 0) {ChangeColor(1);}
+    Vec2f uvs[uvCount];
+    ChangeColor(1);
     uint32 normalCount;
     ChangeColor(1);
-    struct {
-        float x;
-        float y;
-        float z;
-    } normals[12*normalCount];
-    if (normalCount != 0) {ChangeColor(1);}
+    Vec3f normals[normalCount];
     uint32 stripCount;
     ChangeColor(1);
-    struct {
-        uint32 unk4Count;
-        ChangeColor(1);
-        byte unk4s[2*unk4Count];
-        if (unk4Count != 0) {ChangeColor(1);}
-        byte unk5[8];
-        ChangeColor(1);
-    } strips[stripCount];
+    Strip_Z strips[stripCount];
     if (points.header.linkInfo.flags & 2) {
-        byte unk6[4*stripCount];
-        if (stripCount != 0) {ChangeColor(1);}
+        byte unkBytes[4*stripCount]; // stored in Strip_Z
+        ChangeColor(1);
     }
     uint32 stripExtCount;
     ChangeColor(1);
-    struct {
-        uint32 unk8Count;
-        ChangeColor(1);
-        byte unk8s[8*unk8Count];
-        if (unk8Count != 0) {ChangeColor(1);}
-    } stripExts[stripExtCount];
+    StripExt_Z stripExts[stripExtCount];
+    ChangeColor(1);
     uint32 materialCrc32Count;
     ChangeColor(1);
     uint32 materialCrc32s[materialCrc32Count];
@@ -321,14 +341,16 @@ struct VertexStruct48_blend1 {
     Vec3fByte normals;
     ubyte normalPadding;
     Vec2f UV;
-    float unk[5];
+    float blendIndices[4] <read=matIndexToBoneIndex,optimize=false>;
+    float blendWeights[1];
 };
 
+// shadow skin
 struct VertexStruct48_skinVolume {
     ChangeColor(1);
-    Vec3f coordinates;
-    Vec3f unk1;
-    Vec3f unk2;
+    Vec3f pt1;
+    Vec3f pt2;
+    Vec3f pt3;
     Vec3f blendIndices;
 };
 
@@ -344,11 +366,12 @@ struct VertexStruct36 {
     float luvY; // lightUVY? related to radiosity 
 };
 
+// shadow mesh
 struct VertexStruct24 {
     ChangeColor(1);
     Vec3f coordinates;
-    float unk;
-    Vec2f UV;
+    ChangeColor(1);
+    Vec3f normals;
 };
 
 struct VertexStructUnk (uint32 bytes) {

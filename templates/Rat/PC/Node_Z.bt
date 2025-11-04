@@ -71,8 +71,8 @@ string Vec3fToString( Vec3f& value )
 //0x80 -> INVERSE MATRIX NEEDS UPDATE (ONLY USED BY OBJECT, OR WHEN CALLING GETINVERSEWORLDMATRIX). UBI SRC: FL_NODE_INVALIDMAT
 //0x100 -> MATRIX CHANGED (USED BY OBJECT).
 //0x200 -> RELATED TO CARRYING (LINKED TO ANOTHER NODE?).
-//0x400 -> RELATED TO OMNI (BEING LIT BY OMNI?).
-//0x800 -> RELATED TO CLIPPING (OCCLUSION).
+//0x400 -> NOT LIT BY OMNI. FL_NODE_NO_OMNI
+//0x800 -> NOT OCCLUDED BY OCCLUDER. FL_NODE_NO_OCCLUDER
 //0x1000 -> DONT USE AGENT (NO AGENT CREATED IF 1).
 //0x2000 -> USE LOD AGENT (ANIMATEDAGENT_Z IF 0, LODAGENT_Z IF 1. ONLY USED BY NODES WITH LOD_Z AS OBJECT). UBI SRC: FL_NODE_SEQUENCED
 //0x4000 -> UNK
@@ -80,13 +80,13 @@ string Vec3fToString( Vec3f& value )
 //0x10000 -> NO COLLISION SEAD (NON COLLIDABLE?). UBI SRC: FL_NODE_NO_SEADCOLLIDE
 //0x20000 -> NO DISPLAY SEAD (NOT VISIBLE?). UBI SRC (If it still were there): FL_NODE_NO_SEADDISPLAY
 //0x40000 -> HIDDEN. UBI SRC: FL_NODE_HIDE
-//0x80000 -> UNK
-//0x100000 -> UNK
-//0x200000 -> UNK
-//0x400000 -> UNK
-//0x800000 -> UNK
-//0x1000000 -> NO SHARED DATA (USES OBJECTDATA_Z IF 0, DOESNT IF 1).
-//0x2000000 -> RENDERER RELATED.
+//0x80000 -> CAN'T CHANGE LINKED? IN ObjectMove_Z::ChangeLink. I assume from asobo video it is FL_NODE_USER_LOCK
+//0x100000 -> HIDE IN VIEWPORT 0. FL_NODE_VP0_HIDE
+//0x200000 -> HIDE IN VIEWPORT 1. FL_NODE_VP1_HIDE
+//0x400000 -> HIDE IN VIEWPORT 2. FL_NODE_VP2_HIDE
+//0x800000 -> HIDE IN VIEWPORT 3. FL_NODE_VP3_HIDE
+//0x1000000 -> NO SHARED DATA (USES OBJECTDATA_Z IF 0, DOESNT IF 1). FL_NODE_NO_SHARED
+//0x2000000 -> RENDERER RELATED. Affects logic of collectibles and physics of items?
 //0x4000000 -> DO COLLISION. UBI SRC: FL_NODE_COLLIDE
 //0x8000000 -> HAS SHADOW (DOES SHADOW UPDATE, ONLY USED BY NODES WITH LOD_Z AS OBJECT). UBI SRC: FL_NODE_SHADOW
 //0x10000000 -> ABORT ANIMFRAME SEQUENCE. UBI SRC: FL_NODE_SEQUENCED_ABORT
@@ -99,6 +99,9 @@ struct LinkInfo {
 };
 
 struct ObjectHeader {
+    byte BFF[4];
+    uint16 bytesToSkip;
+    byte restOfBFFHeader[bytesToSkip];
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;
@@ -173,9 +176,9 @@ struct Node_Z
     ChangeColor(1);
     Quat rotation;
     float scale;
-    float otherScale; // used in omnis to scale the whole range of the omni
-    float oneOverScale;
-    float unkFloat1;
+    float uniformScale; // used in omnis to scale the whole range of the omni
+    float invUniformScale;
+    uint32 occluderZoneStartId; // Similar to the one in surface_z, it indexes into the dyn array of indices in Occluder_Z
     ChangeColor(1);
     color colors<optimize=false>;
     ChangeColor(1);
@@ -193,9 +196,9 @@ struct Node_Z
     ChangeColor(1);
     uint16 worldId;
     ChangeColor(1);
-    uint32 unknown5;
+    uint32 unknown5; // debug to test if they are used or not (they're stored in the inverseRotInWorldMatrix)
     ChangeColor(1);
-    uint32 unknown6;
+    uint32 unknown6; // debug to test if they are used or not (they're stored in the inverseRotInWorldMatrix)
     PrintInfo();
 } node;
 

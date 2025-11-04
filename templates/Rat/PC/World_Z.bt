@@ -32,7 +32,14 @@ struct LinkInfo {
     uint32 linkedCrc32[linkCount];
 };
 
+struct BffHeader {
+    char magic[4];
+    ushort bytesToSkip;
+    byte skippedBytes[bytesToSkip];
+};
+
 struct ObjectHeader {
+    BffHeader bffHeader;
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;
@@ -128,15 +135,15 @@ struct World_Z {
     ChangeColor(1);
     ObjectHeader objectHeader;
     ChangeColor(1);
-    uint32 linkedCrc32Count;
+    uint32 noSeadNodesCrc32sMaybeCount;
     ChangeColor(1);
-    uint32 linkedCrc32s[linkedCrc32Count];
+    uint32 noSeadNodesCrc32sMaybe[noSeadNodesCrc32sMaybeCount];
     ChangeColor(1);
     uint32 rootNodeCrc32;
     ChangeColor(1);
-    SeadHandle_Z seadHandle0;
+    SeadHandle_Z displaySeadHandle;
     ChangeColor(1);
-    SeadHandle_Z seadHandle1;
+    SeadHandle_Z collideSeadHandle;
     ChangeColor(1);
     uint32 animFrameCrc32Count;
     ChangeColor(1);

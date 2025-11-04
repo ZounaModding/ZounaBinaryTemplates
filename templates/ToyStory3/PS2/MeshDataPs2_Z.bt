@@ -132,9 +132,9 @@ struct Color {
 };
 
 struct ObjectDatas_Z {
-    ObjectHeader objectHeader;
-    float unkFloat1;
-    Color color;
+    uint32 flag;
+	ChangeColor(1);
+    Color defaultColor;
 };
 
 struct MeshData_Z {

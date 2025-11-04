@@ -98,7 +98,14 @@ struct LinkInfo {
     uint16 type;
 };
 
+struct BffHeader {
+    char magic[4];
+    ushort bytesToSkip;
+    byte skippedBytes[bytesToSkip];
+};
+
 struct ObjectHeader {
+    BffHeader bffHeader;
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;
@@ -114,7 +121,7 @@ struct ClassRes {
     uint32 crc32;
 };
 
-struct SphereColNode {
+struct SphereColNode_Z {
     byte data[28];
 };
 
@@ -142,7 +149,7 @@ struct Lod_Z {
     uint32 bSphereColNode;
     ChangeColor(1);
     if (bSphereColNode != 0) {
-        SphereColNode sphereColNode;
+        SphereColNode_Z sphereColNode;
     }
     ChangeColor(1);
     uint32 sphereColCount;

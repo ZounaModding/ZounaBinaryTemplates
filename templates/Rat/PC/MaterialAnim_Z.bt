@@ -103,10 +103,14 @@ struct LinkInfo {
     ubyte links[header.linkSize - (linkCount * 4) - 8];
 };
 
+struct BffHeader {
+    char magic[4];
+    ushort bytesToSkip;
+    byte skippedBytes[bytesToSkip];
+};
+
 struct ObjectHeader {
-    byte BFF[4];
-    uint16 bytesToSkip;
-    byte restOfBFFHeader[bytesToSkip];
+    BffHeader bffHeader;
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;
@@ -196,7 +200,7 @@ struct KeyframerFlag_Z
 struct KeyHdl_Z {
     float time;
     ChangeColor(1);
-    uint32 handle;
+    int32 handle;
 };
 
 struct KeyframerHdl_Z
@@ -204,6 +208,8 @@ struct KeyframerHdl_Z
     uint32 keyCount;
     KeyHdl_Z keys[keyCount] <optimize=false>;
 };
+
+// flags: 0x1 -> water effect (together with material rdrFlag 0x7 and params, textureFlag 0x3 with diffuse and envmap)
 
 struct MaterialAnim_Z {
     ChangeColor(1);
@@ -213,29 +219,29 @@ struct MaterialAnim_Z {
     ChangeColor(1);
     float duration;
     ChangeColor(1);
-    KeyframerHdl_Z keyframerTexHdl;
+    KeyframerHdl_Z texHdlKeyframer;
     ChangeColor(1);
-    KeyframerVec2fLinear_Z keyframerTranslation;
+    KeyframerVec2fLinear_Z translationKeyframer;
     ChangeColor(1);
-    KeyframerVec2fLinear_Z keyframerScale;
+    KeyframerVec2fLinear_Z scaleKeyframer;
     ChangeColor(1);
-    KeyframerFloatLinearComp_Z keyframerRotation;
+    KeyframerFloatLinearComp_Z rotationKeyframer;
     ChangeColor(1);
-    KeyframerVec3fLinear_Z keyframerDiffuse;
+    KeyframerVec3fLinear_Z diffuseColorKeyframer;
     ChangeColor(1);
-    KeyframerVec3fLinear_Z keyframerEmissive;
+    KeyframerVec3fLinear_Z emissiveColorKeyframer;
     ChangeColor(1);
-    KeyframerFloatLinearComp_Z keyframerDiffuseAlpha;
+    KeyframerFloatLinearComp_Z diffuseAlphaKeyframer;
     ChangeColor(1);
-    KeyframerVec4fLinear_Z keyframerSpecular;
+    KeyframerVec4fLinear_Z kspecularKeyframer;
     ChangeColor(1);
-    KeyframerVec4fLinear_Z keyframerParams;
+    KeyframerVec4fLinear_Z paramsKeyframer;
     ChangeColor(1);
-    KeyframerFlag_Z keyframerCollisionFlag;
+    KeyframerFlag_Z collisionFlagKeyframer;
     ChangeColor(1);
-    KeyframerFlag_Z keyframerRenderFlag;
+    KeyframerFlag_Z renderFlagKeyframer;
     ChangeColor(1);
-    KeyframerFlag_Z keyframerObjectFlag;
+    KeyframerFlag_Z objectFlagKeyframer;
     ChangeColor(1);
-    uint32 materialCrc32;
+    int32 materialCrc32;
 } materialAnim;

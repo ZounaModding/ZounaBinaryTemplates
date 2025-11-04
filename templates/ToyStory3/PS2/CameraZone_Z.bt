@@ -146,7 +146,7 @@ struct ObjectHeader {
 };
 
 
-struct RangeSizeOffset {
+struct SplineZoneVoxel_Z {
     uint16 size;
     ChangeColor(1);
     uint16 offset;
@@ -165,13 +165,13 @@ struct SplineZoneSead_Z {
     ChangeColor(1);
     uint32 sizeY;
     ChangeColor(1);
-    RangeSizeOffset gridDA[sizeX*sizeY]; // stores the indices of zones that apply for a certain grid square
+    SplineZoneVoxel_Z gridDA[sizeX*sizeY]; // stores the indices of zones that apply for a certain grid square
     ChangeColor(1);
     uint32 zoneIndexCount;
     uint16 zoneIndices[zoneIndexCount]; // stores indices into splineZones
 };
 
-struct Spline {
+struct CornerSpline {
     uint16 Pt0Id; // first index into points DA
     uint16 Pt1Id; // second index into points DA
 };
@@ -179,13 +179,17 @@ struct Spline {
 struct SplineZone {
     float Y; // (maxY + minY / 2) taken from the max and min points of the splines that make it up, used to determine closest zone if 2 or more zones overlap
     ChangeColor(1);
-    RangeSizeOffset splineIdsRef; // stores indices of the splineIds that make up this zone
+    SplineZoneVoxel_Z splineIdsRef; // stores indices of the splineIds that make up this zone
     ChangeColor(1);
     uint16 unkShort1;
     ChangeColor(1);
     uint16 pointFlag; // related to it using Pt0 or Pt1 of the spline
     ChangeColor(1);
     uint32 unkUint;
+};
+
+struct SplineZoneLink {
+    byte unkBytes[12];
 };
 
 struct SplineZone_Z {
@@ -197,7 +201,7 @@ struct SplineZone_Z {
     Vec3f points[pointCount] <optimize=false>;
     ChangeColor(1);
     uint32 splineCount;
-    Spline splines[splineCount] <optimize=false>;
+    CornerSpline splines[splineCount] <optimize=false>;
     ChangeColor(1);
     uint32 splineZoneCount;
     SplineZone splineZones[splineZoneCount] <optimize=false>;
@@ -205,8 +209,8 @@ struct SplineZone_Z {
     uint32 splineIdCount;
     uint16 splineIds[splineIdCount] <optimize=false>; // stores indices into the spline DA
     ChangeColor(1);
-    uint32 unk12ByteCount; // unused?
-    Vec3f unk12Bytes[unk12ByteCount] <optimize=false>; // unused?
+    uint32 splineZoneLinkCount;
+    SplineZoneLink splineZoneLinks[splineZoneLinkCount] <optimize=false>;
     ChangeColor(1);
     SplineZoneSead_Z splineZoneSead;
 };
@@ -244,7 +248,7 @@ struct Trigger_Z {
 };
 
 struct ZoneTriggers_Z {
-    RangeSizeOffset triggerIdsRef;
+    SplineZoneVoxel_Z triggerIdsRef;
 };
 
 struct CameraZone_Z {

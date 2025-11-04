@@ -1,6 +1,6 @@
 //------------------------------------------------
 //--- 010 Editor v12.0.1 Binary Template
-//--- Black Sheep Studio Mesh v1.73
+//--- TotemTech Mesh v1.75
 //------------------------------------------------
 
 LittleEndian();
@@ -185,8 +185,8 @@ struct Strip_Z {
     ChangeColor(1);
     uint vertexReferenceCount;
     short vertexReferences[vertexReferenceCount];
-    uint flag;
     uint matId;
+    byte flag;
 };
 
 struct StripExt_Z {

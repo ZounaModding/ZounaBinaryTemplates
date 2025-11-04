@@ -87,7 +87,8 @@ struct Sphere_Z {
 
 struct ObjectDatas_Z {
     uint32 flag;
-    Sphere_Z bSphereLocal;   
+	ChangeColor(1);
+    Color defaultColor;
 };
 
 struct Quat {
@@ -106,13 +107,13 @@ struct BoneNode_Z {
     uint32 flags;
     Vec3f localTranslation;
     uint32 placeHolderChildPtr;
-    Vec3f modelRotMatrixRow1;
-    short modelMatrixId;
-    short inverseModelMatrixId;
-    Vec3f modelRotMatrixRow2;
-    uint32 placeholderModelMatrixPtr;
-    Vec3f modelRotMatrixRow3;
-    uint32 placeholderInverseModelMatrixPtr;
+    Vec3f modelRotMatrixRow1; // Mat3x4
+    short modelMatrixId; // Mat3x4
+    short inverseModelMatrixId; // Mat3x4
+    Vec3f modelRotMatrixRow2; // Mat3x4
+    uint32 placeholderModelMatrixPtr; // Mat3x4
+    Vec3f modelRotMatrixRow3; // Mat3x4
+    uint32 placeholderInverseModelMatrixPtr; // Mat3x4
     Quat localRotationInverse1;
     uint32 unkPtr1;
     uint32 unkPtr2;
@@ -190,9 +191,9 @@ struct Skel_Z {
     uint32 boneNodeGroupsCount; //One boneGroup per mesh generally
     BoneNodeGroup boneNodeGroups[boneNodeGroupsCount]<optimize=false>;
     ChangeColor(1);
-    uint32 unkCrc32Count;
+    uint32 morphTargetCrc32Count;
     ChangeColor(1);
-    uint32 unkCrc32s[unkCrc32Count];
+    uint32 morphTargetCrc32s[morphTargetCrc32Count];
     ChangeColor(1);
     uint32 sphereColBone1Count;
     SphereColBone_Z sphereColBones1[sphereColBone1Count] <optimize=false>;

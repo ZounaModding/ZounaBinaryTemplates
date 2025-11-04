@@ -1,6 +1,6 @@
 //------------------------------------------------
 //--- 010 Editor v12.0.1 Binary Template
-//--- Asobo Studio LightDataPc_Z v1.06.63.0X
+//--- Asobo Studio ParticlesData_Z v1.06.63.0X
 //------------------------------------------------
 
 LittleEndian();
@@ -116,7 +116,14 @@ struct LinkInfo {
     uint32 linkedCrc32[linkCount];
 };
 
+struct BffHeader {
+    char magic[4];
+    ushort bytesToSkip;
+    byte skippedBytes[bytesToSkip];
+};
+
 struct ObjectHeader {
+    BffHeader bffHeader;
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;
@@ -135,21 +142,28 @@ struct Color {
 
 struct ObjectDatas_Z {
     ObjectHeader objectHeader;
+    ChangeColor(1);
     uint32 flag;
+	ChangeColor(1);
     Color defaultColor;
 };
 
-struct LightData_Z {
+struct ParticlesDataEle_Z {
+    uint16 maxQuantity;
+};
+
+struct ParticlesData_Z {
     ChangeColor(1);
     ObjectDatas_Z objectDatas;
     ChangeColor(1);
-    Vec3f direction;
+    Sphere_Z bSphere;
     ChangeColor(1);
-    Vec3f color;
+    float unkFloat1;
     ChangeColor(1);
-    byte padding[12];
+    float unkFloat2;
     ChangeColor(1);
-    uint flag;
-    ChangeColor(1);
-    Vec3f ambient;
-} lightData;
+    uint32 particleEmitterDataCount;
+    ParticlesDataEle_Z particleEmitterDatas[particleEmitterDataCount];
+    uint32 worldSpacePlaneVec3fCount;
+    Vec3f worldSpacePlaneVec3fs[worldSpacePlaneVec3fCount]; // [i] = pos, [i+1] = normal
+} particlesData;

@@ -1,9 +1,9 @@
 //------------------------------------------------
 //--- 010 Editor v12.0.1 Binary Template
-//--- Asobo Studio MeshGC_Z v1.05.54.00
+//--- Asobo Studio MeshPc_Z v1.06.63.0X
 //------------------------------------------------
 
-BigEndian();
+LittleEndian();
 
 //------------------------------------------------
 //--- Color Implementation taken from JPG.bt
@@ -12,16 +12,16 @@ local int colorSelect = 0;
 local int colorId = 0;
 local DWORD clr = 0;
 local DWORD jetMap[6*3] = {
-	0x0000cc,0x0000ff,0x0033ff,0x0066ff,0x0099ff,0x00ccff,
-	0x00cccc,0x33ffcc,0x66ff99,0x99ff66,0xccff33,0xffff00,
-	0xffcc00,0xff9900,0xff6600,0xff3300,0xff0000,0xcc0000
+    0x0000cc,0x0000ff,0x0033ff,0x0066ff,0x0099ff,0x00ccff,
+    0x00cccc,0x33ffcc,0x66ff99,0x99ff66,0xccff33,0xffff00,
+    0xffcc00,0xff9900,0xff6600,0xff3300,0xff0000,0xcc0000
 };
 
 void ChangeColor(byte bChangeColor) {
-	if(bChangeColor == 1) {colorSelect++; colorId = 0;}
-	clr = jetMap[(colorSelect%3)*6+(colorId%6)];
-	SetBackColor(clr);
-	colorId++;
+    if(bChangeColor == 1) {colorSelect++; colorId = 0;}
+    clr = jetMap[(colorSelect%3)*6+(colorId%6)];
+    SetBackColor(clr);
+    colorId++;
 }
 
 //------------------------------------------------
@@ -105,13 +105,12 @@ struct Quat {
     float w;
 };
 
-struct Mat4x4 {
-    Vec4f rows[4];
+struct Mat3x3 {
+    Vec3f rows[3];
 };
 
-struct Sphere_Z {
-    Vec3f Center;
-    float radius;
+struct Mat4x4 {
+    Vec4f rows[4];
 };
 
 struct Mat3x4 {
@@ -124,9 +123,28 @@ struct Box_Z {
     float maybeScale; // not really used it seems
 };
 
+struct Sphere_Z {
+    Vec3f Center;
+    float radius;
+};
+
+struct Segment_Z {
+    Vec3f origin;
+    float length;
+    Vec3f direction;
+    float pad;
+};
+
+struct Cylindre_Z {
+    Segment_Z seg;
+    float radius;
+};
+
 struct LinkInfo {
+    uint32 linkCrc32;
     uint32 linkCount;
-    uint32 links[linkCount];
+    uint32 linkedCrc32[linkCount];
+    //uint32 dataCrc32; DIFF
     Sphere_Z bSphereLocal;
     Box_Z bBox;
     float fadeOutDistance;
@@ -134,21 +152,26 @@ struct LinkInfo {
     uint16 type;
 };
 
+struct BffHeader {
+    char magic[4];
+    ushort bytesToSkip;
+    byte skippedBytes[bytesToSkip];
+};
+
 struct ObjectHeader {
+    BffHeader bffHeader;
+    BigEndian();
     uint32 dataSize;
     uint32 compressedSize;
     uint32 classCrc32;
     uint32 nameCrc32;
-    uint32 linkCrc32;
     LinkInfo linkInfo;
 };
 
-struct PointsRelated0 {
-    byte data[12];
-};
-
-struct PointsRelated1 {
-    byte data[16];
+// $SABE: Tangent Binormal Vertex ? - From Monopoly MAP
+struct TBVtx {
+    Vec2f unkVec1;
+    Vec2f unkVec2;
 };
 
 struct MorpherRelated {
@@ -172,34 +195,21 @@ struct Morpher_Z {
     MorphTargetDesc_Z morphTargetDescs[morphTargetDescCount];
 };
 
-struct SphereCol {
-    byte data[20];
+struct SphereCol_Z {
+    Sphere_Z sphere;
+    uint32 flag;
     uint32 nameCrc32;
 };
 
-struct BoxCol {
-    float unk1;
-    float unk2;
-    float unk3;
-    float unk4;
-    float unk5;
-    float unk6;
-    float unk7;
-    float unk8;
-    float unk9;
-    float unk10;
-    float unk11;
-    float unk12;
-    float unk13;
-    float unk14;
-    float unk15;
-    float unk16;
-    uint32 unk17;
+struct BoxCol_Z {
+    Box_Z box;
+    uint32 flag;
     uint32 nameCrc32;
 };
 
-struct CylindreCol {
-    byte data[40];
+struct CylindreCol_Z {
+    Cylindre_Z cylindre;
+    uint32 flag;
     uint32 nameCrc32;
 };
 
@@ -210,17 +220,20 @@ struct AABBColTri {
     int16 materialIndex;
 };
 
-struct AABBCol {
-    float unk1;
-    float unk2;
-    float unk3;
-    int16 unk4;
-    int16 unk5;
-    float unk6;
-    float unk7;
-    float unk8;
-    int16 unk9;
-    int16 unk10;
+struct AABBColTreeNode {
+    Vec3f bbMin;
+    int16 rightChildIndexPlusOne;
+    int16 leftChildIndexPlusOne;
+    Vec3f bbMin;
+    int16 aabbColTriOffset;
+    int16 aabbColTriSize;
+};
+
+struct AABBCol_Z {
+    uint32 aabbColTriCount;
+    AABBColTri aabbColTris[aabbColTriCount];
+    uint32 aabbColTreeNodeCount;
+    AABBColTreeNode aabbColTreeNodes[aabbColTreeNodeCount];
 };
 
 struct Vertex {
@@ -229,25 +242,35 @@ struct Vertex {
     int16 z;
 };
 
-struct Vec3i8 {
-    byte x;
-    byte y;
-    byte z;
-};
-
-struct Vec2i16 {
-    int16 u;
-    int16 v;
-};
-
 struct Points_Z {
     ObjectHeader header;
     ChangeColor(1);
-    uint32 PointsRelated0Count; // maybe vertices
-    PointsRelated0 PointsRelateds0[PointsRelated0Count];
-    uint32 PointsRelated1Count; // maybe normals
-    PointsRelated1 PointsRelateds1[PointsRelated1Count];
+    uint32 positionCount;
+    Vec3f positions[positionCount];
+    uint32 tbVtxCount;
+    TBVtx tbVtxs[tbVtxCount];
     Morpher_Z morpher;
+};
+
+struct Strip_Z {
+    uint32 indexCount;
+    ChangeColor(1);
+    uint16 indices[indexCount];
+    ChangeColor(1);
+    byte unkBytes[8];
+};
+
+struct Vtx_Z {
+    uint16 uvId;
+    uint16 normId;
+    uint16 colId;
+    uint16 verticesId;
+};
+
+struct StripExt_Z {
+    uint32 vtxCount;
+    ChangeColor(1);
+    Vtx_Z vertices[vtxCount];
 };
 
 struct Mesh_Z {
@@ -255,41 +278,22 @@ struct Mesh_Z {
     ChangeColor(1);
     uint32 uvCount;
     ChangeColor(1);
-    struct {
-        float u;
-        float v;
-    } uvs[8*uvCount];
-    if (uvCount != 0) {ChangeColor(1);}
+    Vec2f uvs[uvCount];
+    ChangeColor(1);
     uint32 normalCount;
     ChangeColor(1);
-    struct {
-        float x;
-        float y;
-        float z;
-    } normals[12*normalCount];
-    if (normalCount != 0) {ChangeColor(1);}
+    Vec3f normals[normalCount];
     uint32 stripCount;
     ChangeColor(1);
-    struct {
-        uint32 unk4Count;
-        ChangeColor(1);
-        byte unk4s[2*unk4Count];
-        if (unk4Count != 0) {ChangeColor(1);}
-        byte unk5[8];
-        ChangeColor(1);
-    } strips[stripCount];
+    Strip_Z strips[stripCount];
     if (points.header.linkInfo.flags & 2) {
-        byte unk6[4*stripCount];
-        if (stripCount != 0) {ChangeColor(1);}
+        byte unkBytes[4*stripCount]; // stored in Strip_Z
+        ChangeColor(1);
     }
     uint32 stripExtCount;
     ChangeColor(1);
-    struct {
-        uint32 unk8Count;
-        ChangeColor(1);
-        byte unk8s[8*unk8Count];
-        if (unk8Count != 0) {ChangeColor(1);}
-    } stripExts[stripExtCount];
+    StripExt_Z stripExts[stripExtCount];
+    ChangeColor(1);
     uint32 materialCrc32Count;
     ChangeColor(1);
     uint32 materialCrc32s[materialCrc32Count];
@@ -303,27 +307,32 @@ struct Mesh_Z {
     ChangeColor(1);
     uint32 sphereColCount;
     ChangeColor(1);
-    SphereCol sphereCols[sphereColCount];
+    SphereCol_Z sphereCols[sphereColCount];
     ChangeColor(1);
     uint32 boxColCount;
     ChangeColor(1);
-    BoxCol boxCols[boxColCount];
+    BoxCol_Z boxCols[boxColCount];
     ChangeColor(1);
     uint32 cylindreColCount;
     ChangeColor(1);
-    CylindreCol cylindreCols[cylindreColCount];
+    CylindreCol_Z cylindreCols[cylindreColCount];
     ChangeColor(1);
-    uint32 AABBColTriCount;
-    ChangeColor(1);
-    AABBColTri AABBColTris[AABBColTriCount]; 
-    ChangeColor(1);
-    uint32 AABBColCount;
-    ChangeColor(1);
-    AABBCol AABBCols[AABBColCount];
+    AABBCol_Z aabbCol;
     ChangeColor(1);
     uint32 vertexCount;
     ChangeColor(1);
-    Vertex vertices[vertexCount];
+    Vertex vertices[vertexCount]; //Used for AABB col
+};
+
+struct Vec3i8 {
+    byte x;
+    byte y;
+    byte z;
+};
+
+struct Vec2i16 {
+    int16 u;
+    int16 v;
 };
 
 struct vertexRef {

@@ -3,8 +3,6 @@
 //--- Asobo Studio Material_Z v1.06.63.0X
 //------------------------------------------------
 
-LittleEndian();
-
 //------------------------------------------------
 //--- Color Implementation taken from JPG.bt
 
@@ -187,14 +185,12 @@ struct LinkInfo {
     int32 linkCrc32;
     uint32 linkCount;
     int32 linkedCrc32[linkCount];
-    ubyte links[header.linkSize - (linkCount * 4) - 8];
 };
 
 struct ObjectHeader {
     BffHeader bffHeader;
+    BigEndian();
     uint32 dataSize;
-    uint32 linkSize;
-    uint32 decompressedSize;
     uint32 compressedSize;
     int32 classCrc32;
     int32 nameCrc32;

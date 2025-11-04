@@ -3,8 +3,6 @@
 //--- Asobo Studio MeshGC_Z v1.06.63.0X
 //------------------------------------------------
 
-BigEndian();
-
 //------------------------------------------------
 //--- Color Implementation taken from JPG.bt
 
@@ -136,7 +134,15 @@ struct LinkInfo {
     uint16 type;
 };
 
+struct BffHeader {
+    char magic[4];
+    ushort bytesToSkip;
+    byte skippedBytes[bytesToSkip];
+};
+
 struct ObjectHeader {
+    BffHeader bffHeader;
+    BigEndian();
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;

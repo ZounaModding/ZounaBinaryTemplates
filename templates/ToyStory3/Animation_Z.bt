@@ -142,7 +142,7 @@ struct AnimationMorph_Z {
     KeyframerFloatComp_Z keyframerFloatComp;
 };
 
-struct AnimationNodeModifier_Z {
+struct AnimationConcatNode_Z {
     uint32 boneNameCrc32;
     uint16 boneId;
     uint16 flag;
@@ -158,7 +158,7 @@ struct AnimationNodeModifier_Z {
     uint16 messageFrameCount;
 };
 
-struct AnimationMaterialModifier_Z {
+struct AnimationConcatMtl_Z {
     uint32 materialLinkCrc32;
     uint16 matId;
     uint16 flag;
@@ -174,15 +174,7 @@ struct AnimationMaterialModifier_Z {
     uint16 keyframerFloatComp2FrameCount;
 };
 
-struct AnimationMeshModifier_Z {
-    uint32 meshLinkCrc32;
-    uint16 meshId;
-    uint16 flag;
-    uint16 keyframerFloatCompStartFrame;
-    uint16 keyframerFloatCompFrameCount;
-};
-
-struct AnimationMorphModifier_Z {
+struct AnimationConcat_Z {
     uint32 meshLinkCrc32;
     uint16 meshId;
     uint16 flag;
@@ -198,20 +190,20 @@ struct Animation_Z {
     ChangeColor(1);
     float unkSecondField;
     ChangeColor(1);
-    uint16 unkShortSecondField;
+    uint16 flag;
     ChangeColor(1);
     AnimationNode_Z animNode;
     AnimationMaterial_Z animMat;
     AnimationMesh_Z animMesh;
     AnimationMorph_Z animMorph;
-    uint32 animationNodeModifierCount;
-    AnimationNodeModifier_Z animationNodeModifiers[animationNodeModifierCount];
-    uint32 animationMaterialModifierCount;
-    AnimationMaterialModifier_Z animationMaterialModifiers[animationMaterialModifierCount];
-    uint32 animationMeshModifierCount;
-    AnimationMeshModifier_Z animationMeshModifiers[animationMeshModifierCount];
-    uint32 animationMorphModifierCount;
-    AnimationMorphModifier_Z animationMorphModifiers[animationMorphModifierCount];
+    uint32 animationConcatNodeCount;
+    AnimationConcatNode_Z animationConcatNode[animationConcatNodeCount];
+    uint32 animationConcatMaterialCount;
+    AnimationConcatMtl_Z animationConcatMaterial[animationConcatMaterialCount];
+    uint32 animationConcatMeshCount;
+    AnimationConcat_Z animationConcatMesh[animationConcatMeshCount];
+    uint32 animationConcatMorphCount;
+    AnimationConcat_Z animationConcatMorph[animationConcatMorphCount];
     PrintInfo();
 } animation;
 

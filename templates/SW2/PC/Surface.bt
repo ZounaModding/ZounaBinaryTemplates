@@ -1,9 +1,11 @@
 //------------------------------------------------
 //--- 010 Editor v12.0.1 Binary Template
-//--- Asobo Studio SkinPc_Z v1.06.63.0X
+//--- Shaun White 2 Surface_Z v2.158
 //------------------------------------------------
 
 LittleEndian();
+BitfieldLeftToRight();
+BitfieldDisablePadding();
 
 //------------------------------------------------
 //--- Color Implementation taken from JPG.bt
@@ -61,6 +63,13 @@ string Vec3fToString( Vec3f& value )
 
 typedef struct
 {
+    int X;
+    int Y;
+    int Z;
+} Vec3i;
+
+typedef struct
+{
     float X;
     float Y;
 } Vec2f <read=Vec2fToString>;
@@ -96,7 +105,6 @@ string Vec3fByteToString( Vec3fByte& value )
 
 //------------------------------------------------
 
-
 struct Quat {
     Vec3f v;
     float w;
@@ -106,7 +114,12 @@ struct Mat4x4 {
     Vec4f rows[4];
 };
 
+struct BoundingVolume_Z {
+    uint32 volumeType;
+};
+
 struct Sphere_Z {
+    BoundingVolume_Z vol;
     Vec3f Center;
     float radius;
 };
@@ -116,128 +129,168 @@ struct Mat3x4 {
 };
 
 struct Box_Z {
+    BoundingVolume_Z vol;
     Mat3x4 mat;
     Vec3f vec;
     float maybeScale; // not really used it seems
 };
 
-struct LinkInfo {
-    uint32 linkCrc32;
-    uint32 linkCount;
-    uint32 linkedCrc32[linkCount];
-    uint32 skelCrc32;
-    Sphere_Z bSphereLocal;
-    Box_Z bBox;
-    float fadeOutDistance;
-    uint32 flags;
-    uint16 type;
-};
-
-struct BffHeader {
-    char magic[4];
-    ushort bytesToSkip;
-    byte skippedBytes[bytesToSkip];
-};
-
 struct ObjectHeader {
-    BffHeader bffHeader;
+    byte BFF[16];
+    BigEndian();
     uint32 dataSize;
-    uint32 linkSize;
-    uint32 decompressedSize;
-    uint32 compressedSize;
     uint32 classCrc32;
+    uint32 fileNameCrc32;
+};
+
+struct BaseObject_Z {
+    ObjectHeader header;
     uint32 nameCrc32;
-    LinkInfo linkInfo;
 };
 
-struct MorphPacket_Z {
-    uint32 unk0Crc32;
-    uint32 unk1Crc32;
-}; // unused
-
-struct DynArray_Z {
-    uint32 sizeCapacity;
-    uint32 ptr;
+struct Object_Z {
+    BaseObject_Z baseObject;
+    Sphere_Z bSphereLocal;
+    uint16 type;
+    uint32 flags;
 };
 
-struct MatPacket_Z {
-    ChangeColor(1);
-    uint32 materialLinkCrc32;
-    uint32 boneNodeNamesCrc32[7];
-    DynArray_Z placeholderMorphPacketDA;
-    uint32 morphPacketCount;
-    MorphPacket_Z morphPackets[morphPacketCount] <optimize=false>;
-};
-
-struct MeshPacket_Z {
-    ChangeColor(1);
-    uint32 matPacketCount;
-    MatPacket_Z matPackets[matPacketCount] <optimize=false>;
-};
-
-struct RotShapeObject { // name confirmed by wii version
-    byte unkBytes[8];
-};
-
-struct BlendVtx_Z {
-    uint32 vtxId;
-    float percent;
-};
-
-struct ObjectBlend {
-    ChangeColor(1);
-    uint16 meshId;
+struct Points_Z {
+    Object_Z object;
     ChangeColor(1);
     uint32 vertexCount;
-    BlendVtx_Z vertices[vertexCount] <optimize=false>;
+    Vec3f vertices[vertexCount]<optimize=false>;
+    ChangeColor(1);
+    uint32 materialCount;
+    uint32 materialCrc32s[materialCount]<optimize=false>;
+};
+
+struct PatchCollision {
+    Sphere_Z sphere;
+    Box_Z invBBox;
+    uint32 vertexEntry;
+};
+
+struct EdgeCol {
+    ChangeColor(1);
+    uint16 flag;
+    uint16 edgeId;
+    uint16 cacheIndexMaybe;
+    Sphere_Z sphere;
+};
+
+struct CullCone {
+    byte data[32];
+};
+
+struct Patch_Z {
+    ChangeColor(1);
+    uint16 flag;
+    uint16 matId;
+};
+
+struct Edge_Z {
+    ChangeColor(1);
+    uint16 P[2];
+    uint16 T[2];
+};
+
+struct SeadVoxel_Z {
+    uint16 elementEntry;
+    uint16 elementCount;
+};
+
+struct SeadIndex_Z {
+    ChangeColor(1);
+    uint seadVoxelCount;
+    SeadVoxel_Z seadVoxels[seadVoxelCount];
+    ChangeColor(1);
+    uint patchIndexCount;
+    uint16 patchIndices[patchIndexCount];
+    ChangeColor(1);
+    uint flagCount;
+    uint flags[flagCount];
+    ChangeColor(1);
+    uint numElements;
+    Vec3f step;
+    ChangeColor(1);
+    Vec3f center;
+    ChangeColor(1);
+    Vec3f xAxis;
+    ChangeColor(1);
+    Vec3f yAxis;
+    ChangeColor(1);
+    Vec3f zAxis;
+    ChangeColor(1);
+    Vec3i iSize;
+    ChangeColor(1);
+    Vec3f fSize;
+};
+
+struct shouldDrawBitfield {
+    byte indexInDrawInfoArray : 3;
+    byte shiftAmountForBit : 5;
+    byte other;
+};
+
+struct SurfaceTreeEle {
+    Sphere_Z bSphere;
+    uint32 flag;
+    uint16 off1;
+    uint16 off2;
+};
+
+struct Surface_Z {
+    ChangeColor(1);
+    Points_Z points;
+    ChangeColor(1);
+    uint32 edgeColCount;
+    EdgeCol edgeCols[edgeColCount] <optimize=false>;
+    ChangeColor(1);
+    uint32 patchCount;
+    Patch_Z patches[patchCount] <optimize=false>;
+    ChangeColor(1);
+    uint32 edgeCount;
+    Edge_Z edges[edgeCount] <optimize=false>;
     ChangeColor(1);
     uint32 normalCount;
-    BlendVtx_Z normals[normalCount] <optimize=false>;
-};
-
-struct Bone_Z {
+    Vec3f normals[normalCount];
     ChangeColor(1);
-    uint32 boneNameCrc32;
+    uint32 patchColCount;
+    PatchCollision patchCols[patchColCount] <optimize=false>;
     ChangeColor(1);
-    uint32 objectBlendCount;
+    uint32 sTreeTabCount;
+    SurfaceTreeEle sTreeTab[sTreeTabCount];
     ChangeColor(1);
-    ObjectBlend objectBlends[objectBlendCount] <optimize=false>;
-};
-
-struct hashElt {
-    int value;
-    int ref;
-};
-
-struct Skin_Z {
-    ObjectHeader header;
-    ChangeColor(1);
-    uint32 meshCrc32Count;
-    ChangeColor(1);
-    uint32 meshCrc32s[meshCrc32Count] <optimize=false>;
-    ChangeColor(1);
-    uint32 rotShapeObjectCount;
-    ChangeColor(1);
-    RotShapeObject rotShapeObjects[rotShapeObjectCount] <optimize=false>;
-    ChangeColor(1);
-    uint32 boneCount;
-    Bone_Z bones[boneCount] <optimize=false>;
-    ChangeColor(1);
-    byte isClassId;
-    if (isClassId) {
-        uint32 animClassIdCount;
-        hashElt animClassIds[animClassIdCount] <optimize=false>;
-        uint32 soundClassIdCount;
-        hashElt soundClassIds[soundClassIdCount] <optimize=false>;
+    byte isSead;
+    if (isSead) {
+        ChangeColor(1);
+        SeadIndex_Z seadIndex;
     }
+    float meanPatchSphereRadius;
 };
 
-struct SkinPc_Z {
+struct VertexSurfaceCached_Z {
+    uint16 pos[3];
+    ubyte normal[3];
+    uint32 color;
+    uint16 uv[2];
+};
+
+struct SurfaceCached_Z {
+    Surface_Z surface;
     ChangeColor(1);
-    Skin_Z skin;
+    uint32 vertexSurfaceCachedCount;
+    VertexSurfaceCached_Z verticesSurfaceCached[vertexSurfaceCachedCount];
+};
+
+struct SurfaceWii_Z {
+    SurfaceCached_Z surfaceCached;
     ChangeColor(1);
-    uint32 matrixCacheCheck; // 7 for rat, 8 in WALL-E, 21 in FUEL, 15 in Monopoly PC
-    ChangeColor(1);
-    uint32 meshPacketCount;
-    MeshPacket_Z meshPackets[meshPacketCount] <optimize=false>;
-} skinPc;
+    Vec3f compressedPosTranslation;
+    float compressedPosScale;
+    local uint vertexCount = surfaceCached.surface.patchCount * 42; // 42=7*7 (SurfaceLod*SurfaceLod)
+    VertexSurfaceCached_Z verticesSurfaceWii[vertexCount];
+};
+
+SurfaceWii_Z surfaceWii;

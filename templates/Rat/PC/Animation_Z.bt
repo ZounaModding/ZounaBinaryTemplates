@@ -144,30 +144,30 @@ struct KeyframerFloatComp_Z
 
 struct AnimationNode_Z {
     uint16 cdcd;
-    KeyframerRot_Z keyframerRot;
-    KeyframerBezierRot_Z keyframerBezierRot;
-    KeyframerVec3fComp_Z keyframerScale;
-    KeyframerVec3fComp_Z keyframerTranslation;
-    KeyframerMessage_Z keyframerMessage;
+    KeyframerRot_Z rotKeyframer;
+    KeyframerBezierRot_Z bezierRotKeyframer;
+    KeyframerVec3fComp_Z scaleKeyframer;
+    KeyframerVec3fComp_Z translationKeyframer;
+    KeyframerMessage_Z msgKeyframer;
 };
 
 struct AnimationMaterial_Z {
-    KeyframerFloatComp_Z keyframerTranslationU;
-    KeyframerFloatComp_Z keyframerTranslationV;
-    KeyframerVec3fComp_Z keyframerDiffuseColor;
-    KeyframerVec3fComp_Z keyframerEmissiveColor;
-    KeyframerFloatComp_Z keyframerRotation;
+    KeyframerFloatComp_Z translationUKeyframer;
+    KeyframerFloatComp_Z translationVKeyframer;
+    KeyframerVec3fComp_Z diffuseColorKeyframer;
+    KeyframerVec3fComp_Z emissiveColorKeyframer;
+    KeyframerFloatComp_Z rotationKeyframer;
 };
 
 struct AnimationMesh_Z {
-    KeyframerFloatComp_Z keyframerHide; // hides mesh if float is 0
+    KeyframerFloatComp_Z hideKeyframer; // hides mesh if float is 0
 };
 
 struct AnimationMorph_Z {
-    KeyframerFloatComp_Z keyframerWeight;
+    KeyframerFloatComp_Z weightKeyframer;
 };
 
-struct AnimationNodeModifier_Z {
+struct AnimationConcatNode_Z {
     uint32 boneNameCrc32;
     uint16 boneId;
     uint16 flag;
@@ -183,7 +183,7 @@ struct AnimationNodeModifier_Z {
     uint16 messageFrameCount;
 };
 
-struct AnimationMaterialModifier_Z {
+struct AnimationConcatMtl_Z {
     uint32 materialLinkCrc32;
     uint16 matId;
     uint16 flag;
@@ -199,20 +199,12 @@ struct AnimationMaterialModifier_Z {
     uint16 rotationFrameCount;
 };
 
-struct AnimationMeshModifier_Z {
-    uint32 meshLinkCrc32;
-    uint16 meshId;
+struct AnimationConcat_Z {
+    uint32 objectLinkCrc32;
+    uint16 objectId;
     uint16 flag;
-    uint16 keyframerFloatCompStartFrame;
-    uint16 keyframerFloatCompFrameCount;
-};
-
-struct AnimationMorphModifier_Z {
-    uint32 morphObjectLinkCrc32;
-    uint16 morphObjectId;
-    uint16 flag;
-    uint16 keyframerFloatCompStartFrame;
-    uint16 keyframerFloatCompFrameCount;
+    uint16 startFrame;
+    uint16 frameCount;
 };
 
 struct Animation_Z {
@@ -229,14 +221,14 @@ struct Animation_Z {
     AnimationMaterial_Z animMat;
     AnimationMesh_Z animMesh;
     AnimationMorph_Z animMorph;
-    uint32 animationNodeModifierCount;
-    AnimationNodeModifier_Z animationNodeModifiers[animationNodeModifierCount];
-    uint32 animationMaterialModifierCount;
-    AnimationMaterialModifier_Z animationMaterialModifiers[animationMaterialModifierCount];
-    uint32 animationMeshModifierCount;
-    AnimationMeshModifier_Z animationMeshModifiers[animationMeshModifierCount];
-    uint32 animationMorphModifierCount;
-    AnimationMorphModifier_Z animationMorphModifiers[animationMorphModifierCount];
+    uint32 animationConcatNodeCount;
+    AnimationConcatNode_Z animationConcatNode[animationConcatNodeCount];
+    uint32 animationConcatMaterialCount;
+    AnimationConcatMtl_Z animationConcatMaterial[animationConcatMaterialCount];
+    uint32 animationConcatMeshCount;
+    AnimationConcat_Z animationConcatMesh[animationConcatMeshCount];
+    uint32 animationConcatMorphCount;
+    AnimationConcat_Z animationConcatMorph[animationConcatMorphCount];
 } animation;
 
 string int16ToFloat(int16& value )

@@ -127,17 +127,25 @@ struct Object {
     byte data[size];
 };
 
-struct Block (local uint32 objectCount, local uint32 padding) {
+local uint32 curBlock = 0;
+
+struct Block (local uint32 objectCount, local uint32 padding, local uint32 realWorkBufOffset) {
     local uint32 maxCompressedObjDecompressedSize = 0;
     local uint32 indexMaxCompressedObjDecompressedSize = -1;
     local uint32 offsetInBlock = 0;
     local uint32 workingBufferOffset = 0;
+    local uint32 totalCompressedSize = 0;
+    local uint32 totalDecompressedSize = 0;
+    local uint32 maxCmprDecompressedSize = 0;
     Object objects[objectCount] <optimize=false>;
     local int i;
     for (i = 0; i < objectCount; i++) {
-        if (objects[i].objHeader.compressedSize != 0 && objects[i].objHeader.decompressedSize > maxCompressedObjDecompressedSize) {
+        if (objects[i].objHeader.compressedSize != 0 && objects[i].objHeader.decompressedSize > maxCmprDecompressedSize) {
             indexMaxCompressedObjDecompressedSize = i;
+            maxCmprDecompressedSize = objects[i].objHeader.decompressedSize;
         }
+        totalCompressedSize = totalCompressedSize + objects[i].objHeader.compressedSize;
+        totalDecompressedSize = totalDecompressedSize + objects[i].objHeader.decompressedSize;
     }
     if (indexMaxCompressedObjDecompressedSize != -1) {
         maxCompressedObjDecompressedSize = objects[indexMaxCompressedObjDecompressedSize].objHeader.decompressedSize;
@@ -147,7 +155,12 @@ struct Block (local uint32 objectCount, local uint32 padding) {
         offsetInBlock = offsetInBlock + 24 + objects[indexMaxCompressedObjDecompressedSize].objHeader.linkSize;
         workingBufferOffset = calculatePaddedSize(maxCompressedObjDecompressedSize + offsetInBlock);
     }
-    Printf("-- Info -- #block: %d\n",workingBufferOffset);
+    Printf("-- Info -- #block %d real workingBufferOffset: %d\n",curBlock,realWorkBufOffset);
+    Printf("-- Info -- #block %d calculated workingBufferOffset: %d\n",curBlock,workingBufferOffset);
+    Printf("-- Info -- #block %d totalCompressedSize: %d\n",curBlock,totalCompressedSize);
+    Printf("-- Info -- #block %d totalDecompressedSize: %d\n",curBlock,totalDecompressedSize);
+    Printf("-- Info -- #block %d maxDecompressedSizeOfCompressedObj: %d\n",curBlock,maxCmprDecompressedSize);
+    curBlock = curBlock + 1;
     ChangeColor(1);
     byte padding[padding];
 };
@@ -163,7 +176,7 @@ struct DXX {
     ChangeColor(1);
     for (i = 0; i < header.blockCount; i++) {
         totalObjectCount += header.blockDescriptions[i].objectCount;
-        Block block(header.blockDescriptions[i].objectCount, header.blockDescriptions[i].blockPaddedSize - header.blockDescriptions[i].blockSize);
+        Block block(header.blockDescriptions[i].objectCount, header.blockDescriptions[i].blockPaddedSize - header.blockDescriptions[i].blockSize, header.blockDescriptions[i].workingBufferOffset);
     }
     Printf("-- Info -- #blocks: %d\n",header.blockCount);
     Printf("-- Info -- #objects: %d\n",totalObjectCount);

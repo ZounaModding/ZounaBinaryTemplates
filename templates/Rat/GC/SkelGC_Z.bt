@@ -6,7 +6,6 @@
 //------------------------------------------------
 //--- Color Implementation taken from JPG.bt
 
-BigEndian();
 
 local int colorSelect = 0;
 local int colorId = 0;
@@ -66,7 +65,15 @@ struct LinkInfo {
     uint32 linkedCrc32[linkCount];
 };
 
+struct BffHeader {
+    char magic[4];
+    ushort bytesToSkip;
+    byte skippedBytes[bytesToSkip];
+};
+
 struct ObjectHeader {
+    BffHeader bffHeader;
+    BigEndian();
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;
@@ -87,7 +94,7 @@ struct Sphere_Z {
 
 struct ObjectDatas_Z {
     uint32 flag;
-    Sphere_Z bSphereLocal;   
+    Color defaultColor;   
 };
 
 struct Quat {

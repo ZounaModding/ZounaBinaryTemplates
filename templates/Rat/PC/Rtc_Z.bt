@@ -1,0 +1,268 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//--- Asobo Studio Animation_Z v1.06.63.0X
+//------------------------------------------------
+
+LittleEndian();
+
+//------------------------------------------------
+//--- Color Implementation taken from JPG.bt
+
+local int colorSelect = 0;
+local int colorId = 0;
+local DWORD clr = 0;
+local DWORD jetMap[6*3] = {
+	0x0000cc,0x0000ff,0x0033ff,0x0066ff,0x0099ff,0x00ccff,
+	0x00cccc,0x33ffcc,0x66ff99,0x99ff66,0xccff33,0xffff00,
+	0xffcc00,0xff9900,0xff6600,0xff3300,0xff0000,0xcc0000
+};
+
+void ChangeColor(byte bChangeColor) {
+	if(bChangeColor == 1) {colorSelect++; colorId = 0;}
+	clr = jetMap[(colorSelect%3)*6+(colorId%6)];
+	SetBackColor(clr);
+	colorId++;
+}
+
+//------------------------------------------------
+struct Vec3f {
+    float x;
+    float y;
+    float z;
+};
+
+struct Vec3i16 {
+    int16 x;
+    int16 y;
+    int16 z;
+};
+
+struct Quati16 {
+    int16 x <read=int16ToFloat,optimize=false>;
+    int16 y <read=int16ToFloat,optimize=false>;
+    int16 z <read=int16ToFloat,optimize=false>;
+    int16 w <read=int16ToFloat,optimize=false>;
+};
+
+struct LinkInfo {
+    uint32 linkCrc32;
+    uint32 linkCount;
+    uint32 linkedCrc32[linkCount];
+};
+
+struct ObjectHeader {
+    char bff[4];
+    ushort bytesToSkip;
+    byte headerBytes[bytesToSkip];
+    uint32 dataSize;
+    uint32 linkSize;
+    uint32 decompressedSize;
+    uint32 compressedSize;
+    uint32 classCrc32;
+    uint32 nameCrc32;
+    LinkInfo linkInfo;
+};
+
+struct KeyRot_Z {
+    float time;
+    Quati16 quat;
+};
+
+struct KeyframerRot_Z {
+    uint32 keyCount;
+    KeyRot_Z keys[keyCount];
+};
+
+struct KeyBezierRot_Z {
+    float time;
+    Vec3f value; // euler rotation
+    Vec3f tangentIn; // euler rotation
+    Vec3f tangentOut; // euler rotation
+};
+
+struct KeyframerBezierRot_Z {
+    uint32 keyCount;
+    KeyBezierRot_Z keys[keyCount];
+};
+
+struct KeyVec3fComp_Z {
+    float time;
+    Vec3i16 value;
+    Vec3i16 tangentIn;
+    Vec3i16 tangentOut;
+    int16 padding;
+};
+
+struct KeyframerVec3fComp_Z {
+    uint16 flag;
+    uint32 keyCount;
+    KeyVec3fComp_Z keys[keyCount];
+};
+
+// Message Ids
+// 4 unk
+// 5 sends message to obj
+// 12 used for loop start
+// 13 used for loop end
+// 14 disable bone flag 0x40
+// 15 enable bone flag 0x40
+// 16 material color
+// 33,34 plays sound
+// 128 hides
+// 129 unhide
+// 130 strip (black bar)
+// 140 play anim
+// 142 skip?
+// 148 fade white/black from/to depending on param
+// 153 wait anim
+// 182-185 related to attack fx
+// 228 starts mission
+
+struct Message_Z {
+    uint32 id;
+    int32 param; // is sound crc32 in 33,34
+    uint32 otherParam; // is a flag when id 33
+    float maybefloatParam; // used for sound volume factor if id is 33
+    int32 linkCrc32; // linkCrc32 of node in 228
+};
+
+struct KeyMessage_Z {
+    float time;
+    uint32 messageCount;
+    Message_Z messages[messageCount] <optimize=false>;
+};
+
+struct KeyframerMessage_Z {
+    uint32 keyCount;
+    KeyMessage_Z keys[keyCount] <optimize=false>;
+};
+
+struct KeyFloatComp_Z {
+    float time;
+    int16 value;
+    int16 tangentIn;
+    int16 tangentOut;
+    int16 padding;
+};
+
+struct KeyframerFloatComp_Z
+{
+    uint16 flag;
+    uint32 keyCount;
+    KeyFloatComp_Z keys[keyCount];
+};
+
+struct KeyFloat_Z {
+    float time;
+    float value;
+    float tangentIn;
+    float tangentOut;
+};
+
+struct KeyframerFloat_Z
+{
+    uint16 flag;
+    uint32 keyCount;
+    KeyFloat_Z keys[keyCount] <optimize=false>;
+};
+
+struct KeyVec3f_Z {
+    float time;
+    Vec3f value;
+    Vec3f tangentIn;
+    Vec3f tangentOut;
+};
+
+struct KeyframerVec3f_Z {
+    uint16 flag;
+    uint32 keyCount;
+    KeyVec3f_Z keys[keyCount];
+};
+
+struct KeyExtVec3f_Z {
+    float time;
+    Vec3f value;
+    Vec3f tangentIn;
+    Vec3f tangentOut;
+};
+
+struct KeyframerExtVec3f_Z {
+    uint16 flag;
+    uint32 keyCount;
+    KeyExtVec3f_Z keys[keyCount];
+};
+
+struct RtcAnimationNode_Z {
+    int32 nodeNameCrc32;
+    ushort nodeIndex;
+    KeyframerRot_Z rotationKeyframer <optimize=false>;
+    KeyframerExtVec3f_Z scaleKeyframer <optimize=false>;
+    KeyframerExtVec3f_Z translationKeyframer <optimize=false>;
+    KeyframerMessage_Z messageKeyframer <optimize=false>;
+};
+
+struct AnimationCamera_Z {
+    int32 cameraNodeNameCrc32;
+    ushort nodeIndex;
+    KeyframerFloatComp_Z rollKeyframer <optimize=false>;
+    KeyframerFloatComp_Z fovKeyframer <optimize=false>;
+    KeyframerFloat_Z farKeyframer <optimize=false>;
+    KeyframerFloatComp_Z nearKeyframer <optimize=false>;
+};
+
+struct AnimationOmni_Z {
+    int32 omniNodeNameCrc32;
+    ushort nodeIndex;
+    KeyframerVec3fComp_Z colorKeyframer <optimize=false>;
+    KeyframerFloatComp_Z startKeyframer <optimize=false>; // spotlight inner half angle
+    KeyframerFloatComp_Z endKeyframer <optimize=false>; // spotlight outer half angle
+};
+
+struct RtcNode {
+    int32 parentNameCrc32; // parent link name, camera node and camera target node seem to be children of the same
+    int32 nodeNameCrc32; // link name - Cam is "CAMERA" interest node is "CAMERA INTEREST" target may be "CAMERA01.TARGET", "CAMERA02.TARGET" and so on
+    int32 externalNodeFileNameCrc32; // only set if isExternal == 1
+    int parentNodeIndex;
+    byte isExternal; // not in the rtc BF?
+    int32 localNodeFileNameCrc32; // only set if isExternal == 0
+    int32 maybeAnimFileNameCrc32; // may be anim crc32
+};
+
+struct RtcPerso {
+    int32 nodeIndex; // index in the node array of the node
+    int32 nodeNameCrc32; // link name of the node that will the lod will be attached to
+    int32 lodFileNameCrc32; // name of the character lod
+    int32 animationFileNameCrc32; // name of animation to play for this character
+};
+
+struct Rtc_Z {
+    ChangeColor(1);
+    ObjectHeader objHeader;
+    ChangeColor(1);
+    float maxTime;
+    ChangeColor(1);
+    uint32 rtcAnimNodeCount;
+    RtcAnimationNode_Z rtcAnimNodes[rtcAnimNodeCount] <optimize=false>; // same count as rtcNodes
+    uint32 animCameraCount;
+    AnimationCamera_Z animCameras[animCameraCount] <optimize=false>;
+    uint32 animOmniCount;
+    AnimationOmni_Z animOmnis[animOmniCount] <optimize=false>;
+    uint32 rtcNodeCount;
+    RtcNode rtcNodes[rtcNodeCount]; // same count as rtcAnimNodes | same as rtcPersoCount       + (animCameraCount*2)        + 1        + animOmniCount + externalNodes
+    uint32 rtcPersoCount;           //                                                         cam node + interest node    cam root
+    RtcPerso rtcPersos[rtcPersoCount];
+    uint32 animCrc32Count;
+    uint32 animCrc32s[animCrc32Count];
+    uint32 soundCrc32Count;
+    uint32 soundCrc32s[soundCrc32Count];
+    KeyframerMessage_Z msgKeyframer;
+} rtc;
+
+string int16ToFloat(int16& value )
+{
+    local string str = "";
+    local float int16ToFloat = (float)value*0.0005;
+    SPrintf(str, "%f",int16ToFloat);
+
+    return str;
+}
