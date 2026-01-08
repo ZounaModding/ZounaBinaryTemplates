@@ -233,10 +233,10 @@ struct AABBCol_Z {
     AABBColTreeNode aabbColTreeNodes[aabbColTreeNodeCount];
 };
 
-struct Vertex {
-    int16 x;
-    int16 y;
-    int16 z;
+struct Vec3f_S16_Z {
+    int16 x <read=S16_Z_toFloat,optimize=false>; // / 1024.0f to get float
+    int16 y <read=S16_Z_toFloat,optimize=false>; // / 1024.0f to get float
+    int16 z <read=S16_Z_toFloat,optimize=false>; // / 1024.0f to get float
 };
 
 struct Points_Z {
@@ -316,9 +316,9 @@ struct Mesh_Z {
     ChangeColor(1);
     AABBCol_Z aabbCol;
     ChangeColor(1);
-    uint32 vertexCount;
+    uint32 collisionVertexCount;
     ChangeColor(1);
-    Vertex vertices[vertexCount]; //Used for AABB col
+    Vec3f_S16_Z collisionVertices[collisionVertexCount]; //Used for AABB col (maybe other stuff)
 };
 
 struct VertexStruct60 {
@@ -474,7 +474,14 @@ string byteToFloat(ubyte& value )
     local float normalByteToD3DColorComponent = ((value/255.0));
     local float normalByteToFloat = ((normalByteToD3DColorComponent * 2) - 1);
     SPrintf(str, "%f",normalByteToFloat);
+    return str;
+}
 
+string S16_Z_toFloat(int16& value )
+{
+    local string str = "";
+    local float S16_Z_toFloat = value / 1024.0;
+    SPrintf(str, "%f",S16_Z_toFloat);
     return str;
 }
 
@@ -482,6 +489,5 @@ string matIndexToBoneIndex(float& value )
 {
     local string str = "";
     SPrintf(str, "%.0f", value/6);
-
     return str;
 }

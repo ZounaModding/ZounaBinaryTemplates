@@ -1,6 +1,6 @@
 //------------------------------------------------
 //--- 010 Editor v12.0.1 Binary Template
-//--- Asobo Studio CameraZone_Z v1.06.63.0X
+//--- Asobo Studio Occluder_Z v1.06.63.0X
 //------------------------------------------------
 
 LittleEndian();
@@ -172,7 +172,7 @@ struct SplineZoneSead_Z {
     ChangeColor(1);
     uint32 sizeY;
     ChangeColor(1);
-    SplineZoneVoxel_Z gridDA[sizeX*sizeY]; // stores the indices of zones that apply for a certain grid square
+    SplineZoneVoxel_Z gridDA[sizeX*sizeY]; // stores the references (offset+size) to indices (in zoneIndices) of zones that apply for a certain grid cell
     ChangeColor(1);
     uint32 zoneIndexCount;
     uint16 zoneIndices[zoneIndexCount]; // stores indices into splineZones
@@ -183,29 +183,25 @@ struct CornerSpline {
     uint16 Pt1Id; // second index into points DA
 };
 
-struct SplineZoneSpline_Z {
-    uint16 size;
-    ChangeColor(1);
-    uint16 offset;
-};
-
 struct SplineZone {
     float Y; // (maxY + minY / 2) taken from the max and min points of the splines that make it up, used to determine closest zone if 2 or more zones overlap
     ChangeColor(1);
-    SplineZoneSpline_Z splineIdsRef; // stores indices of the splineIds that make up this zone
+    SplineZoneVoxel_Z splineIdsRef; // stores indices of the splineIds that make up this zone
     ChangeColor(1);
-    uint16 unkShort1;
+    uint16 splineZoneLinkId;
     ChangeColor(1);
     uint16 pointFlag; // related to it using Pt0 or Pt1 of the spline
     ChangeColor(1);
-    uint32 unkUint;
+    uint16 unkFlag1; // used with spline zone link in occluder
+    ChangeColor(1);
+    uint16 unkFlag2; // used with spline zone link in occluder
 };
 
 struct SplineZoneLink {
     float x;
     float y;
-    uint16 id1;
-    uint16 id2;
+    uint16 idInBitArray1; // Occluder only?
+    uint16 idInBitArray2; // Occluder only?
 };
 
 struct SplineZone_Z {

@@ -171,8 +171,8 @@ struct World_Z {
     ChangeColor(1);
     uint32 warpCrc32;
     uint32 gameObjCrc32;
-    uint32 crc32Unk5;
-    uint32 crc32Unk6;
+    uint32 crc32Unk5; // Unknown struct, has a Node_Z* at offset 0x80, probably inherits from Object_Z
+    uint32 genWorldCrc32; // Never used
     local uint32 i = 0;
     for (i = 0; i < seadHandle0.seadEntryCount; i++) {
         if (seadHandle0.seadEntries[i].nodeCrc32 == 0) {

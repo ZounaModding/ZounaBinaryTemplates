@@ -172,7 +172,7 @@ struct SplineZoneSead_Z {
     ChangeColor(1);
     uint32 sizeY;
     ChangeColor(1);
-    SplineZoneVoxel_Z gridDA[sizeX*sizeY]; // stores the indices of zones that apply for a certain grid square
+    SplineZoneVoxel_Z gridDA[sizeX*sizeY]; // stores the references (offset+size) to indices (in zoneIndices) of zones that apply for a certain grid cell
     ChangeColor(1);
     uint32 zoneIndexCount;
     uint16 zoneIndices[zoneIndexCount]; // stores indices into splineZones
@@ -196,7 +196,10 @@ struct SplineZone {
 };
 
 struct SplineZoneLink {
-    byte unkBytes[12];
+    float x;
+    float y;
+    uint16 idInBitArray1; // Occluder only?
+    uint16 idInBitArray2; // Occluder only?
 };
 
 struct SplineZone_Z {
@@ -219,7 +222,7 @@ struct SplineZone_Z {
     uint32 splineZoneLinkCount;
     SplineZoneLink splineZoneLinks[splineZoneLinkCount] <optimize=false>;
     ChangeColor(1);
-    SplineZoneSead_Z splineZoneSead;
+    SplineZoneSead_Z splineZoneSead; // check if it's its own struct or not
 };
 
 struct Trigger_Z {

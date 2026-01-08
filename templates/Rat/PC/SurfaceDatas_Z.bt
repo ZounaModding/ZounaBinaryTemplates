@@ -1,6 +1,6 @@
 //------------------------------------------------
 //--- 010 Editor v12.0.1 Binary Template
-//--- Asobo Studio Material_Z v1.06.63.0X
+//--- Asobo Studio SurfaceDatas_Z v1.06.63.0X
 //------------------------------------------------
 
 LittleEndian();
@@ -99,18 +99,10 @@ string Vec3fByteToString( Vec3fByte& value )
 struct LinkInfo {
     uint32 linkCrc32;
     uint32 linkCount;
-    uint32 linkedCrc32[linkCount] <optimize=false>;
-    ubyte links[header.linkSize - (linkCount * 4) - 8];
-};
-
-struct BffHeader {
-    char magic[4];
-    ushort bytesToSkip;
-    byte skippedBytes[bytesToSkip];
+    uint32 linkedCrc32[linkCount];
 };
 
 struct ObjectHeader {
-    BffHeader bffHeader;
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;
@@ -124,120 +116,16 @@ struct Color {
     float r;
     float g;
     float b;
+    float a;
 };
 
-struct KeyVec2fLinear_Z {
-    float time;
-    ChangeColor(1);
-    Vec2f value;
-};
-
-struct KeyframerVec2fLinear_Z {
-    uint16 flag;
-    ChangeColor(1);
-    uint32 keyCount;
-    KeyVec2fLinear_Z keys[keyCount] <optimize=false>;
-};
-
-struct KeyVec3fLinear_Z {
-    float time;
-    ChangeColor(1);
-    Vec3f value;
-};
-
-struct KeyframerVec3fLinear_Z {
-    uint16 flag;
-    ChangeColor(1);
-    uint32 keyCount;
-    KeyVec3fLinear_Z keys[keyCount] <optimize=false>;
-};
-
-struct KeyVec4fLinear_Z {
-    float time;
-    ChangeColor(1);
-    Vec4f value;
-};
-
-struct KeyframerVec4fLinear_Z {
-    uint16 flag;
-    ChangeColor(1);
-    uint32 keyCount;
-    KeyVec4fLinear_Z keys[keyCount] <optimize=false>;
-};
-
-struct KeyFloatLinearComp_Z {
-    float time;
-    ChangeColor(1);
-    int16 value;
-    ChangeColor(1);
-    int16 padding;
-};
-
-struct KeyframerFloatLinearComp_Z
-{
-    uint16 flag;
-    ChangeColor(1);
-    uint32 keyCount;
-    KeyFloatLinearComp_Z keys[keyCount] <optimize=false>;
-};
-
-struct KeyFlag_Z {
-    float time;
-    ChangeColor(1);
+struct ObjectDatas_Z {
+    ObjectHeader objectHeader;
     uint32 flag;
+    Color defaultColor;
 };
 
-struct KeyframerFlag_Z
-{
-    uint32 keyCount;
-    KeyFlag_Z keys[keyCount] <optimize=false>;
-};
-
-struct KeyHdl_Z {
-    float time;
+struct SurfaceDatas_Z {
     ChangeColor(1);
-    int32 handle;
-};
-
-struct KeyframerHdl_Z
-{
-    uint32 keyCount;
-    KeyHdl_Z keys[keyCount] <optimize=false>;
-};
-
-// flags: 0x1 -> water effect (together with material rdrFlag 0x7 and params, textureFlag 0x3 with diffuse and envmap)
-
-struct MaterialAnim_Z {
-    ChangeColor(1);
-    ObjectHeader header;
-    ChangeColor(1);
-    byte flags;
-    ChangeColor(1);
-    float duration;
-    ChangeColor(1);
-    KeyframerHdl_Z texHdlKeyframer;
-    ChangeColor(1);
-    KeyframerVec2fLinear_Z translationKeyframer;
-    ChangeColor(1);
-    KeyframerVec2fLinear_Z scaleKeyframer;
-    ChangeColor(1);
-    KeyframerFloatLinearComp_Z rotationKeyframer;
-    ChangeColor(1);
-    KeyframerVec3fLinear_Z diffuseColorKeyframer;
-    ChangeColor(1);
-    KeyframerVec3fLinear_Z emissiveColorKeyframer;
-    ChangeColor(1);
-    KeyframerFloatLinearComp_Z diffuseAlphaKeyframer;
-    ChangeColor(1);
-    KeyframerVec4fLinear_Z kspecularKeyframer;
-    ChangeColor(1);
-    KeyframerVec4fLinear_Z paramsKeyframer;
-    ChangeColor(1);
-    KeyframerFlag_Z collisionFlagKeyframer;
-    ChangeColor(1);
-    KeyframerFlag_Z renderFlagKeyframer;
-    ChangeColor(1);
-    KeyframerFlag_Z objectFlagKeyframer;
-    ChangeColor(1);
-    int32 materialCrc32;
-} materialAnim;
+    ObjectDatas_Z objectDatas;
+} surfaceDatas;

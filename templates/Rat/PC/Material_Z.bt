@@ -115,9 +115,9 @@ string Vec3fByteToString( Vec3fByte& value )
 //0x1000 -> Unused ?
 //0x2000 -> UNK -> seems common
 //0x4000 -> UNK -> seems common
-//0x8000 -> Unused ?
+//0x8000 -> Collect
 //0x10000 -> Unused ?
-//0x20000 -> Unused ?
+//0x20000 -> Collectable
 //0x40000 -> Sound related - combined with 80000,100000,200000 changes , water sound/particles? , ground grip 1 (doesnt do anything)
 //0x80000 -> Sound related - combined with 40000,100000,200000 changes , ground grip 2 (doesnt do anything)
 //0x100000 -> Sound related - combined with 40000,80000,200000 changes
@@ -135,21 +135,24 @@ string Vec3fByteToString( Vec3fByte& value )
 
 //Material render flags:
 
+// Part of "Code"
 //0x1 -> Use alpha mask for envmap | set with 0x2, 0x4 for water (doesn't apply the alpha mask in that case ._.)
 //0x2 -> Only diffuse (No envmap) ? --> USED FOR SHADER PICKING | set with 0x1, 0x4 for water
 //0x4 -> Only diffuse 2 (No envmap) ? Idk diff with 0x2 --> USED FOR SHADER PICKING | set with 0x1, 0x2 for water
 //0x8 -> Only diffuse 3 (No envmap) ? Idk diff with 0x2 --> USED FOR SHADER PICKING
 //0x10 -> Only diffuse 4 (No envmap) ? Idk diff with 0x2 --> USED FOR SHADER PICKING
-//0x20 -> Something
-//0x40 -> Unused ?
+
+// Actual Render flags
+//0x20 -> FL_ALPHABLENDED
+//0x40 -> FL_TRANSPARENT
 //0x80 -> FL_INVISIBLE
-//0x100 -> FL_TEX_ADDRESS_CLAMP_U ?
-//0x200 -> FL_TEX_ADDRESS_CLAMP_V ?
-//0x400 -> Makes some parts invisible but not all ? maybe some sort of culling
-//0x800 -> Makes OTHER parts invisible but not all ? maybe some sort of culling
-//0x1000 -> Glass like - Bright / transparent ? (white)
-//0x2000 -> Dark / transparent ? (black)
-//0x4000 -> Unused ?
+//0x100 -> FL_TEX_ADDRESS_CLAMP_U
+//0x200 -> FL_TEX_ADDRESS_CLAMP_V
+//0x400 -> Makes some parts invisible but not all ? maybe some sort of culling | May be FL_STENCIL_OCCLUDER
+//0x800 -> Makes OTHER parts invisible but not all ? maybe some sort of culling | May be FL_STENCIL_OCCLUDEE
+//0x1000 -> FL_ADDITIF (additive blending)
+//0x2000 -> FL_SOUSTRACTIF (subtractive blending)
+//0x4000 -> FL_DESTADDITIF (destination additive blending?)
 //0x8000 -> Unused ?
 //0x10000 -> Unused ?
 //0x20000 -> FL_TWO_SIDE - Disable backface culling
