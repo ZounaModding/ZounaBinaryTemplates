@@ -52,6 +52,9 @@ struct LinkInfo {
 };
 
 struct ObjectHeader {
+    byte BFF[4];
+    uint16 bytesToSkip;
+    byte restOfBFFHeader[bytesToSkip];
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;
@@ -95,21 +98,12 @@ struct Material_Z {
     ChangeColor(1);
     ubyte textureFlag;
     ChangeColor(1);
-    if (textureFlag == 1){
-        uint32 diffuseTex;
-        uint32 unk1;
-        uint32 unk2;
-        uint32 unk3;
-        uint32 unk4;
-        uint32 unk5;
-        uint32 unk6;
-        uint32 unk7;
-    }
-    else if (textureFlag == 3){
-        uint32 diffuseTex; 
-        uint32 unkTex;
-    }
-    else{
-        uint32 tex[4];
-    };
+    uint32 diffuseTex;
+    uint32 unk1;
+    uint32 unk2;
+    uint32 unk3;
+    uint32 unk4;
+    uint32 unk5;
+    uint32 unk6;
+    uint32 unk7;
 } material;

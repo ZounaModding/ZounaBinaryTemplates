@@ -119,6 +119,9 @@ struct LinkInfo {
 };
 
 struct ObjectHeader {
+    byte BFF[4];
+    uint16 bytesToSkip;
+    byte restOfBFFHeader[bytesToSkip];
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;
@@ -222,33 +225,6 @@ struct Vertex {
     int16 z;
 };
 
-struct vertexGroup {
-    uint32 zero0;
-    uint32 zero1;
-    uint32 zero2;
-    ChangeColor(1);
-    uint32 maybePrimitive;
-    ChangeColor(1);
-    uint16 vertexOffsetInBufferInGroups;
-    ChangeColor(1);
-    uint16 unks;
-    ChangeColor(1);
-    uint32 vertexCount;
-    ChangeColor(1);
-    uint32 indexBufferOffsetInShorts;
-    ChangeColor(1);
-    uint32 faceCount;
-    ChangeColor(1);
-    uint32 unk1;
-    ChangeColor(1);
-    uint32 unkss;
-    ChangeColor(1);
-    uint16 vertexSize;
-    ChangeColor(1);
-    uint16 cdcdcdcd;
-    ChangeColor(1);
-};
-
 struct Triangle {
     int16 index1;
     int16 index2;
@@ -264,6 +240,74 @@ struct Points_Z {
     PointsRelated1 PointsRelateds1[PointsRelated1Count];
     uint32 PointsRelated2Count;
     PointsRelated2 PointsRelateds2[PointsRelated2Count];
+};
+
+
+struct unkStruct1 {
+    byte data[32];
+};
+
+struct unkStruct3 {
+    byte data[16];
+};
+
+struct Mesh_Z {
+    Points_Z points;
+    ChangeColor(1);
+    uint32 unk1Count;
+    ChangeColor(1);
+    byte unk1s[8*unk1Count];
+    if (unk1Count != 0) {ChangeColor(1);}
+    uint32 unk2Count;
+    ChangeColor(1);
+    byte unk2s[12*unk2Count];
+    if (unk2Count != 0) {ChangeColor(1);}
+    uint32 unk3Count;
+    ChangeColor(1);
+    struct unk3 {
+        uint32 unk4Count;
+        ChangeColor(1);
+        byte unk4s[2*unk4Count];
+        if (unk4Count != 0) {ChangeColor(1);}
+        byte unk5[8];
+        ChangeColor(1);
+    } unk3s[unk3Count];
+    if (points.header.linkInfo.flags & 2) {
+        byte unk6[4*unk3Count];
+        if (unk3Count != 0) {ChangeColor(1);}
+    }
+    uint32 unk7Count;
+    ChangeColor(1);
+    struct unk7 {
+        uint32 unk8Count;
+        ChangeColor(1);
+        byte unk8s[8*unk8Count];
+        if (unk8Count != 0) {ChangeColor(1);}
+    } unk7s[unk7Count];
+    uint32 materialCrc32Count;
+    ChangeColor(1);
+    uint32 materialCrc32s[materialCrc32Count];
+    ChangeColor(1);
+    byte stuffRelatedToCounts[24];
+    ChangeColor(1);
+    uint32 sphereColCount;
+    ChangeColor(1);
+    SphereCol sphereCols[sphereColCount];
+    ChangeColor(1);
+    uint32 boxColCount;
+    ChangeColor(1);
+    BoxCol boxCols[boxColCount];
+    ChangeColor(1);
+    uint32 cylindreColCount;
+    ChangeColor(1);
+    CylindreCol cylindreCols[cylindreColCount];
+    ChangeColor(1);
+    AABBCol_Z aabbCol;
+    ChangeColor(1);
+    uint32 vertexCount;
+    ChangeColor(1);
+    Vertex vertices[vertexCount];
+    ChangeColor(1);
 };
 
 struct VertexStruct60 {
@@ -372,6 +416,33 @@ struct IndexBufferExt_Z {
     Triangle tris[faceCount];
 };
 
+struct PrimitiveInfo_Z {
+    uint32 zero0;
+    uint32 zero1;
+    uint32 zero2;
+    ChangeColor(1);
+    uint32 maybePrimitive;
+    ChangeColor(1);
+    uint16 vertexOffsetInBufferInGroups;
+    ChangeColor(1);
+    uint16 unks;
+    ChangeColor(1);
+    uint32 vertexCount;
+    ChangeColor(1);
+    uint32 indexBufferOffsetInShorts;
+    ChangeColor(1);
+    uint32 faceCount;
+    ChangeColor(1);
+    uint32 unk1;
+    ChangeColor(1);
+    uint32 unkss;
+    ChangeColor(1);
+    uint16 vertexSize;
+    ChangeColor(1);
+    uint16 cdcdcdcd;
+    ChangeColor(1);
+};
+
 struct MeshBuffers_Z {
     uint32 vertexBufferCount;
     VertexBufferExt_Z vertexBuffers[vertexBufferCount] <optimize=false>;
@@ -381,7 +452,7 @@ struct MeshBuffers_Z {
     ChangeColor(1);
     uint32 vertexGroupCount;
     ChangeColor(1);
-    vertexGroup vertexGroups[vertexGroupCount]  <optimize=false>;
+    PrimitiveInfo_Z vertexGroups[vertexGroupCount]  <optimize=false>;
     ChangeColor(1);
     uint32 unkStruct2Count;
     unkStruct2 unkStruct2s[unkStruct2Count];
@@ -389,81 +460,15 @@ struct MeshBuffers_Z {
     Morpher_Z morpher;
 };
 
-struct unkStruct1 {
-    byte data[32];
-};
-
-struct Mesh_Z {
-    Points_Z points;
-    ChangeColor(1);
-    uint32 unk1Count;
-    ChangeColor(1);
-    byte unk1s[8*unk1Count];
-    if (unk1Count != 0) {ChangeColor(1);}
-    uint32 unk2Count;
-    ChangeColor(1);
-    byte unk2s[12*unk2Count];
-    if (unk2Count != 0) {ChangeColor(1);}
-    uint32 unk3Count;
-    ChangeColor(1);
-    struct unk3 {
-        uint32 unk4Count;
-        ChangeColor(1);
-        byte unk4s[2*unk4Count];
-        if (unk4Count != 0) {ChangeColor(1);}
-        byte unk5[8];
-        ChangeColor(1);
-    } unk3s[unk3Count];
-    if (points.header.linkInfo.flags & 2) {
-        byte unk6[4*unk3Count];
-        if (unk3Count != 0) {ChangeColor(1);}
-    }
-    uint32 unk7Count;
-    ChangeColor(1);
-    struct unk7 {
-        uint32 unk8Count;
-        ChangeColor(1);
-        byte unk8s[8*unk8Count];
-        if (unk8Count != 0) {ChangeColor(1);}
-    } unk7s[unk7Count];
-    uint32 materialCrc32Count;
-    ChangeColor(1);
-    uint32 materialCrc32s[materialCrc32Count];
-    ChangeColor(1);
-    byte stuffRelatedToCounts[24];
-    ChangeColor(1);
-    uint32 sphereColCount;
-    ChangeColor(1);
-    SphereCol sphereCols[sphereColCount];
-    ChangeColor(1);
-    uint32 boxColCount;
-    ChangeColor(1);
-    BoxCol boxCols[boxColCount];
-    ChangeColor(1);
-    uint32 cylindreColCount;
-    ChangeColor(1);
-    CylindreCol cylindreCols[cylindreColCount];
-    ChangeColor(1);
-    AABBCol_Z aabbCol;
-    ChangeColor(1);
-    uint32 vertexCount;
-    ChangeColor(1);
-    Vertex vertices[vertexCount];
-    ChangeColor(1);
-    uint32 unkStruct1Count;
-    unkStruct1 unkStruct1s[unkStruct1Count];
-    ChangeColor(1);
-    MeshBuffers_Z meshBuffers;
-};
-
-struct unkStruct3 {
-    byte data[16];
-};
-
 struct MeshPC_Z {
     ChangeColor(1);
     Mesh_Z mesh;
     ChangeColor(1);
+	uint32 unkStruct1Count;
+    unkStruct1 unkStruct1s[unkStruct1Count];
+    ChangeColor(1);
+    MeshBuffers_Z meshBuffers;
+	ChangeColor(1);
     uint32 unkStruct3Count;
     unkStruct3 unkStruct3s[unkStruct3Count];
 } meshPc;
