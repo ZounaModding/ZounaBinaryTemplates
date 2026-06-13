@@ -115,8 +115,8 @@ struct Mat3x4 {
 
 struct Box_Z {
     Mat3x4 mat;
-    Vec3f vec;
-    float maybeScale; // not really used it seems
+    Vec3f scale;
+    float radius; // not really used it seems
 };
 
 struct Sphere_Z {
@@ -210,14 +210,14 @@ struct CylindreCol_Z {
     uint32 nameCrc32;
 };
 
-struct AABBColTri {
+struct FaceCol_Z {
     int16 firstVertexId;
     int16 secondVertexId;
     int16 thirdVertexId;
     int16 materialIndex;
 };
 
-struct AABBColTreeNode {
+struct AABBNode_Z {
     Vec3f bbMin;
     int16 rightChildIndexPlusOne;
     int16 leftChildIndexPlusOne;
@@ -228,9 +228,9 @@ struct AABBColTreeNode {
 
 struct AABBCol_Z {
     uint32 aabbColTriCount;
-    AABBColTri aabbColTris[aabbColTriCount];
+    FaceCol_Z aabbColTris[aabbColTriCount];
     uint32 aabbColTreeNodeCount;
-    AABBColTreeNode aabbColTreeNodes[aabbColTreeNodeCount];
+    AABBNode_Z aabbColTreeNodes[aabbColTreeNodeCount];
 };
 
 struct Vec3f_S16_Z {
@@ -424,7 +424,7 @@ struct PrimitiveInfo_Z {
     ChangeColor(1);
     uint16 primitiveType; // D3DPRIMITIVETYPE type
     ChangeColor(1);
-    uint16 shaderToUse; // used to figure out which shader to use
+    uint16 vertexType; // used to figure out which shader to use
     ChangeColor(1);
     uint16 cdcd;
     ChangeColor(1);

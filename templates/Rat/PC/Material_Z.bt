@@ -135,12 +135,19 @@ string Vec3fByteToString( Vec3fByte& value )
 
 //Material render flags:
 
-// Part of "Code"
+// Part of "Code" enum MaterialCode_Z in monopoly (to determine which shader to use)
 //0x1 -> Use alpha mask for envmap | set with 0x2, 0x4 for water (doesn't apply the alpha mask in that case ._.)
 //0x2 -> Only diffuse (No envmap) ? --> USED FOR SHADER PICKING | set with 0x1, 0x4 for water
 //0x4 -> Only diffuse 2 (No envmap) ? Idk diff with 0x2 --> USED FOR SHADER PICKING | set with 0x1, 0x2 for water
 //0x8 -> Only diffuse 3 (No envmap) ? Idk diff with 0x2 --> USED FOR SHADER PICKING
 //0x10 -> Only diffuse 4 (No envmap) ? Idk diff with 0x2 --> USED FOR SHADER PICKING
+//
+// possible known values
+// FL_MTL_CODE_EAU = 5
+// FL_MTL_CODE_EAU_DYNAMIC = 7
+// FL_MTL_CODE_WATER_OCEAN = 8
+//
+//
 
 // Actual Render flags
 //0x20 -> FL_ALPHABLENDED

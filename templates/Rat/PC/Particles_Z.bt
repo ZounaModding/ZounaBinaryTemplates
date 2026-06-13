@@ -239,7 +239,6 @@ struct ParticlesEle_Z {
 // IDK
 //0x200 -> FL_PARTICLES_FOLLOW_NODE - Overrides plane collision - Might be same as UBI FL_PARTICLES_NODEREL but the name is bad
 //0x400 -> FL_PARTICLES_PLANE_COLLISION - Collide with planes defined by the Mat4x4 DA
-// There's also at least 0x200, 0x400 havent looked into them or others
 
 struct Particles_Z
 {

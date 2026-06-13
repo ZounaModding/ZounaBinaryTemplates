@@ -116,7 +116,15 @@ struct LinkInfo {
     uint32 linkedCrc32[linkCount];
 };
 
+
+struct BffHeader {
+    char magic[4];
+    ushort bytesToSkip;
+    byte skippedBytes[bytesToSkip];
+};
+
 struct ObjectHeader {
+    BffHeader bffHeader;
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;
@@ -142,15 +150,19 @@ struct ObjectDatas_Z {
 };
 
 struct unkStruct1 {
-    byte data[16];
+    Vec4f unk;
 };
 
 struct unkStruct2 {
-    byte data[16];
+    Vec4f unk;
 };
 
 struct unkStruct3 {
-    byte data[32];
+    int unk1;
+    int unk2;
+    int unk3;
+    int cdcdcdcd;
+    Vec4f unk4;
 };
 
 struct unkStruct4 {

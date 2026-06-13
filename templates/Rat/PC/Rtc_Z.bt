@@ -214,8 +214,8 @@ struct AnimationOmni_Z {
     int32 omniNodeNameCrc32;
     ushort nodeIndex;
     KeyframerVec3fComp_Z colorKeyframer <optimize=false>;
-    KeyframerFloatComp_Z startKeyframer <optimize=false>; // spotlight inner half angle
-    KeyframerFloatComp_Z endKeyframer <optimize=false>; // spotlight outer half angle
+    KeyframerFloatComp_Z startKeyframer <optimize=false>; // attenuation start
+    KeyframerFloatComp_Z endKeyframer <optimize=false>; // attenuation end
 };
 
 struct RtcNode {
@@ -225,7 +225,7 @@ struct RtcNode {
     int parentNodeIndex;
     byte isExternal; // not in the rtc BF?
     int32 localNodeFileNameCrc32; // only set if isExternal == 0
-    int32 maybeAnimFileNameCrc32; // may be anim crc32
+    int32 localParentNodeFileNameCrc32; // may be anim crc32
 };
 
 struct RtcPerso {

@@ -41,6 +41,7 @@ struct BffHeader {
 
 struct ObjectHeader {
     BffHeader bffHeader;
+    BigEndian(); // for gc
     uint32 dataSize;
     uint32 linkSize;
     uint32 decompressedSize;
